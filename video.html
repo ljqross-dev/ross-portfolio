@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>视频 · Ross的研习社</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23FAF8F4'/%3E%3Crect x='9' y='9' width='14' height='14' fill='%23C8412B' transform='rotate(45 16 16)'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-inner">
+    <a href="index.html#video" class="logo" aria-label="Ross的研习社 首页">
+      <span class="logo-mark" aria-hidden="true"></span>
+      Ross的研习社<span style="color:var(--color-primary)">.</span>
+    </a>
+    <a href="index.html#video" class="btn btn--primary">← 返回视频</a>
+  </div>
+</header>
+
+<main class="container">
+  <section class="video-detail">
+    <a class="back-link" href="index.html#video">← 返回「视频 / 动效」</a>
+    <div class="video-detail-frame">
+      <video id="vd" autoplay controls playsinline preload="auto"></video>
+    </div>
+    <h1 id="vtitle"></h1>
+    <p id="vcap" class="video-detail-cap"></p>
+    <p class="video-detail-tip">此页为带声音的版本；列表页为静音自动循环预览。</p>
+  </section>
+</main>
+
+<script src="js/videos.js"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var id = params.get('vid');
+  var v = (window.VIDEOS || []).filter(function (x) { return x.id === id; })[0];
+  if (!v) { location.href = 'index.html#video'; return; }
+  var el = document.getElementById('vd');
+  el.src = v.src;
+  el.play().catch(function () {});
+  document.getElementById('vtitle').textContent = v.title;
+  document.getElementById('vcap').textContent = v.caption;
+  document.title = v.title + ' · Ross的研习社';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ross的研习社 — 设计 · AI · 写作</title>
+<meta name="description" content="Ross的研习社：长沙的全栈电商视觉运营 / AI 驱动商业设计师 Ross Luo 的个人网站。收录 2019–2026 年代表作品、AI 设计实验与研习文章。" />
+<meta property="og:title" content="Ross的研习社 — 设计 · AI · 写作" />
+<meta property="og:description" content="UI/UX · 产品设计 · 插画 · AI 工作流 · 研习笔记。" />
+<meta property="og:type" content="website" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- 基础西文 + 阿里巴巴普惠体 2.0 (正文) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<!-- 阿里巴巴普惠体 2.0 / 阿里妈妈数黑体 — via Alibaba CDN -->
+<style>
+/* 阿里巴巴普惠体 2.0 — 正文 */
+@font-face{font-family:'AlibabaPuHuiTi';src:url('https://puhuiti.3langsheng.com/fonts/AlibabaPuHuiTi-2-45-Light.woff2') format('woff2');font-weight:300;font-style:normal;font-display:swap;}
+@font-face{font-family:'AlibabaPuHuiTi';src:url('https://puhuiti.3langsheng.com/fonts/AlibabaPuHuiTi-2-55-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'AlibabaPuHuiTi';src:url('https://puhuiti.3langsheng.com/fonts/AlibabaPuHuiTi-2-65-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
+@font-face{font-family:'AlibabaPuHuiTi';src:url('https://puhuiti.3langsheng.com/fonts/AlibabaPuHuiTi-2-75-SemiBold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap;}
+@font-face{font-family:'AlibabaPuHuiTi';src:url('https://puhuiti.3langsheng.com/fonts/AlibabaPuHuiTi-2-85-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap;}
+/* 阿里妈妈数黑体 — 标题 */
+@font-face{font-family:'DingTalkNumber';src:url('https://puhuiti.3langsheng.com/fonts/AlibabaPuHuiTi-3-55-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:'DingTalkNumber';src:url('https://puhuiti.3langsheng.com/fonts/AlibabaPuHuiTi-3-65-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap;}
+@font-face{font-family:'DingTalkNumber';src:url('https://puhuiti.3langsheng.com/fonts/AlibabaPuHuiTi-3-75-SemiBold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap;}
+@font-face{font-family:'DingTalkNumber';src:url('https://puhuiti.3langsheng.com/fonts/AlibabaPuHuiTi-3-85-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap;}
+/* 抖音美好体 — 副文本 */
+@font-face{font-family:'DouyinSans';src:url('https://lf9-static.bytedocdn.com/obj/eden-cn/bjeh7q_p/static/douyin-fonts/DouyinSansBold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap;}
+/* Aa厚底黑 — 数字 */
+@font-face{font-family:'AaHouDiHei';src:url('https://cdn.jsdelivr.net/gh/AaFontGroup/AaFontGroup@aafonts/AaHouDiHei-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}
+</style>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23FAF8F4'/%3E%3Crect x='9' y='9' width='14' height='14' fill='%23C8412B' transform='rotate(45 16 16)'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="css/style.css" />
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+
+<!-- 页头 -->
+<header class="header" id="header">
+  <div class="container header-inner">
+    <a href="#top" class="logo" aria-label="Ross的研习社 首页">
+      <span class="logo-mark" aria-hidden="true"></span>
+      Ross的研习社<span style="color:var(--color-primary)">.</span>
+    </a>
+    <nav class="nav" id="nav" aria-label="主导航">
+      <a href="#work">作品</a>
+      <a href="#video">视频</a>
+      <a href="#private">私域</a>
+      <a href="#blog">文章</a>
+      <a href="#ai">AI 实验室</a>
+      <a href="#about">关于</a>
+      <a href="#contact">联系</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle" data-theme-toggle aria-label="切换深浅模式" type="button"></button>
+      <a href="#contact" class="btn btn--primary">求职/合作</a>
+      <button class="menu-toggle" id="menuToggle" aria-label="打开菜单" aria-expanded="false" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <p class="hero-intro">Ross的研习社 · AI 驱动商业设计师 · 长沙</p>
+        <h1 class="hero-name">做有<span class="accent">呼吸感</span><br/>的设计。</h1>
+        <p class="hero-tagline">我是 Ross Luo。这里是我的研习社——收录作品、AI 设计实验与研习笔记。相信克制、留白，与每一个像素背后的理由。</p>
+        <dl class="hero-meta">
+          <div><dt>所在地</dt><dd>湖南长沙</dd></div>
+          <div><dt>方向</dt><dd>电商视觉 · UI/UX · 品牌/营销</dd></div>
+          <div><dt>语言</dt><dd>中文 / English</dd></div>
+        </dl>
+        <div class="hero-actions">
+          <a href="#work" class="btn btn--primary">查看作品</a>
+          <a href="#blog" class="btn">读研习笔记</a>
+        </div>
+      </div>
+      <div class="hero-thumbs" id="heroThumbs">
+        <!-- 由 JS 注入真实封面 -->
+      </div>
+    </div>
+
+    <!-- 统计条 -->
+    <div class="stats-bar">
+      <div class="stats-grid">
+        <div class="stat reveal">
+          <div class="num">1.96<span class="suffix">w</span></div>
+          <div class="label">人气</div>
+          <div class="note">ZCOOL</div>
+        </div>
+        <div class="stat reveal">
+          <div class="num">6.4<span class="suffix">k</span><span class="accent">+</span></div>
+          <div class="label">累计浏览</div>
+          <div class="note">Behance</div>
+        </div>
+        <div class="stat reveal">
+          <div class="num">70<span class="accent">+</span></div>
+          <div class="label">研习文章</div>
+          <div class="note">小红书笔记</div>
+        </div>
+        <div class="stat reveal">
+          <div class="num">8<span class="accent">+</span></div>
+          <div class="label">AI 工具在用</div>
+          <div class="note">设计工作流</div>
+        </div>
+        <div class="stat reveal">
+          <div class="num">15</div>
+          <div class="label">公开作品</div>
+          <div class="note">2019 — 2026</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 作品 -->
+<section class="section" id="work">
+  <div class="container">
+    <div class="work-head">
+      <div>
+        <span class="eyebrow">Selected Work</span>
+        <h2 class="section-title">精选作品</h2>
+      </div>
+      <div class="filters" id="filters" role="tablist" aria-label="作品分类筛选">
+        <button class="filter-btn active" data-filter="all" type="button">全部</button>
+        <button class="filter-btn" data-filter="ec" type="button">电商</button>
+        <button class="filter-btn" data-filter="uiux" type="button">UI · UX</button>
+        <button class="filter-btn" data-filter="game" type="button">游戏设计</button>
+        <button class="filter-btn" data-filter="icon" type="button">图标</button>
+        <button class="filter-btn" data-filter="illustration" type="button">插画</button>
+        <button class="filter-btn" data-filter="graphic" type="button">平面设计</button>
+      </div>
+    </div>
+
+    <div class="work-grid" id="workGrid">
+      <!-- 由 JS 注入 -->
+    </div>
+  </div>
+</section>
+
+
+
+<!-- 视频 / 动效 -->
+<section class="section section--video" id="video">
+  <div class="container">
+    <div class="work-head">
+      <div>
+        <span class="eyebrow">Motion · AI Video</span>
+        <h2 class="section-title">视频 / 动效</h2>
+      </div>
+      <p class="ai-lead">即梦 AI 影像生成：把创意指令，变成会呼吸的动态画面。</p>
+    </div>
+    <div class="video-grid" id="videoGrid">
+      <!-- 由 JS 注入 -->
+    </div>
+  </div>
+</section>
+
+<!-- 私域 -->
+<section class="section section--private" id="private">
+  <div class="container">
+    <div class="work-head">
+      <div>
+        <span class="eyebrow">Private Domain</span>
+        <h2 class="section-title">私域 · 小红书</h2>
+      </div>
+      <p class="head-lead">用 AI 内容工作流持续运营小红书，把创意沉淀成可复用的私域资产。</p>
+    </div>
+
+    <div class="xhs-author reveal">
+      <img class="xhs-avatar" src="images/xhs-avatar.jpg" onerror="this.onerror=null;this.src='images/xhs-avatar.svg'" alt="进步青年罗先生r 头像" />
+      <div class="xhs-author-meta">
+        <div class="xhs-name">进步青年罗先生r</div>
+        <a class="xhs-profile" href="https://www.xiaohongshu.com/user/profile/57da18087fc5b829c692b553?xsec_token=ABo8yX51RlXT4dJF1TfdWNp37t3uL6rM8m9ulDSETBKcw%3D&xsec_source=pc_search" target="_blank" rel="noopener">访问小红书主页 ↗</a>
+      </div>
+    </div>
+
+    <div class="xhs-filters" id="xFilters" role="tablist" aria-label="私域分类筛选">
+      <!-- 由 JS 注入分类 tab -->
+    </div>
+
+    <div class="xhs-grid" id="xhsGrid">
+      <!-- 由 JS 注入 -->
+    </div>
+
+    <div class="xhs-pagination" id="xhsPagination" aria-label="分页导航"></div>
+
+    <p class="xhs-note">数据同步自小红书主页 · 点赞 / 收藏 / 评论为发布时快照，实时数据请访问 <a href="https://www.xiaohongshu.com/user/profile/57da18087fc5b829c692b553?xsec_token=ABo8yX51RlXT4dJF1TfdWNp37t3uL6rM8m9ulDSETBKcw%3D&xsec_source=pc_search" target="_blank" rel="noopener">小红书主页 ↗</a></p>
+  </div>
+</section>
+
+<!-- 文章 -->
+<section class="section" id="blog">
+  <div class="container">
+    <div class="work-head">
+      <div>
+        <span class="eyebrow">Journal</span>
+        <h2 class="section-title">研习文章</h2>
+      </div>
+      <div class="filters" id="blogFilters" role="tablist" aria-label="文章分类筛选">
+        <button class="filter-btn active" data-bfilter="all" type="button">全部</button>
+        <button class="filter-btn" data-bfilter="design" type="button">设计思考</button>
+        <button class="filter-btn" data-bfilter="ai" type="button">AI 工作流</button>
+        <button class="filter-btn" data-bfilter="notes" type="button">研习笔记</button>
+        <button class="filter-btn" data-bfilter="wechat" type="button">公众号</button>
+      </div>
+    </div>
+
+    <div class="subfilters" id="blogSub" hidden aria-label="公众号子分类">
+      <!-- 由 JS 注入子分类标签 -->
+    </div>
+
+    <div class="blog-grid" id="blogGrid">
+      <!-- 由 JS 注入 -->
+    </div>
+  </div>
+</section>
+<!-- AI 实验室 -->
+<section class="section section--ai" id="ai">
+  <div class="container">
+    <div class="work-head">
+      <div>
+        <span class="eyebrow">AI Lab</span>
+        <h2 class="section-title">AI 实验室</h2>
+      </div>
+      <p class="ai-lead">以 AI 串联设计工作流：从灵感到落地，工具是第二条手臂。</p>
+    </div>
+
+    <div class="ai-grid">
+      <article class="ai-card reveal">
+        <div class="ai-card-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.4 5.3L20 9.5l-5.6 2.2L12 17l-2.4-5.3L4 9.5l5.6-2.2z"/><path d="M19 15l1 2.2L22 18l-2 .8L19 21l-1-2.2L16 18l2-.8z"/></svg>
+        </div>
+        <h3>生成式视觉探索</h3>
+        <p>用 ChatGPT Image 2.0 快速且精准地建立设计方向：从电商主图、详情页到直播间视觉，把「一眼惊艳」与「一看就懂」放进同一个画面。</p>
+        <div class="ai-tags"><span>ChatGPT Image 2.0</span><span>概念稿</span><span>风格探索</span></div>
+      </article>
+
+      <article class="ai-card reveal">
+        <div class="ai-card-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="9" x2="8" y2="18"/></svg>
+        </div>
+        <h3>信息层级梳理</h3>
+        <p>让 Gemini 参与信息架构：梳理页面层级、内容优先级与文案骨架，把界面语言先想清楚，再动手画。</p>
+        <div class="ai-tags"><span>Gemini</span><span>信息架构</span><span>内容策略</span></div>
+      </article>
+
+      <article class="ai-card reveal">
+        <div class="ai-card-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8.5 8.5L15.5 15.5"/><path d="M18 6h-5M6 18v-5"/></svg>
+        </div>
+        <h3>跨平台规范串联</h3>
+        <p>用 Stitch 串联 X、Instagram、小红书等平台的视觉规范，让分散的公域账号用统一的视觉语言建立「你是谁」的认知。</p>
+        <div class="ai-tags"><span>Stitch</span><span>设计规范</span><span>品牌一致性</span></div>
+      </article>
+
+      <article class="ai-card reveal">
+        <div class="ai-card-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><path d="M16.5 13v7M13 16.5h7"/></svg>
+        </div>
+        <h3>组件与变体自动化</h3>
+        <p>Figma AI 自动生成组件与变体，把重复劳动交给工具，把时间留给结构与节奏——设计系统因此更快收敛。</p>
+        <div class="ai-tags"><span>Figma AI</span><span>设计系统</span><span>组件变体</span></div>
+      </article>
+    </div>
+
+    <!-- AI 工作流 -->
+    <div class="ai-flow reveal" aria-label="AI 设计工作流">
+      <div class="ai-flow-step"><span class="ai-flow-num">01</span><h4>定方向</h4><p>ChatGPT Image 建立视觉方向</p></div>
+      <div class="ai-flow-arrow" aria-hidden="true">→</div>
+      <div class="ai-flow-step"><span class="ai-flow-num">02</span><h4>理层级</h4><p>Gemini 梳理信息与文案</p></div>
+      <div class="ai-flow-arrow" aria-hidden="true">→</div>
+      <div class="ai-flow-step"><span class="ai-flow-num">03</span><h4>串规范</h4><p>Stitch 打通跨平台规范</p></div>
+      <div class="ai-flow-arrow" aria-hidden="true">→</div>
+      <div class="ai-flow-step"><span class="ai-flow-num">04</span><h4>做落地</h4><p>Figma AI 生成组件与变体</p></div>
+    </div>
+
+    <!-- 站酷精选 -->
+    <div class="zcool-wrap reveal">
+      <div class="zcool-head work-head">
+        <div>
+          <span class="eyebrow">From ZCOOL</span>
+          <h3 class="zcool-title">AI 节日趣闻</h3>
+        </div>
+        <p class="zcool-lead">把 AI 工作流落到节日命题里——以下两篇已发表于站酷，记录用 AI 讲节日故事的过程。</p>
+      </div>
+      <div class="zcool-grid">
+        <a class="zcool-card" href="https://www.zcool.com.cn/work/ZNzIxMTA2MDQ=.html" target="_blank" rel="noopener">
+          <div class="zcool-banner zcool-banner--duanwu">
+            <span class="zcool-badge">ZCOOL · 站酷</span>
+            <h4>AI 助力创意，「端午节」的夏季之旅</h4>
+          </div>
+          <div class="zcool-body">
+            <p class="zcool-excerpt">从车斗到副驾的端午长路：用 AI 把「粽香轮转」的亲情记忆，生成宫崎骏、鸟山明等不同画风的视觉旅程，并延展主 KV、横版 Banner、C4D 透明材质与概念场景渲染。</p>
+            <div class="zcool-tags"><span>AI 生图</span><span>节日命题</span><span>多画风</span></div>
+            <span class="zcool-go">查看站酷作品 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+          </div>
+        </a>
+        <a class="zcool-card" href="https://www.zcool.com.cn/work/ZNzE4MzMxNTY=.html" target="_blank" rel="noopener">
+          <div class="zcool-banner zcool-banner--wuyi">
+            <span class="zcool-badge">ZCOOL · 站酷</span>
+            <h4>AI 助力创意，「五一劳动节」系列设计</h4>
+          </div>
+          <div class="zcool-body">
+            <p class="zcool-excerpt">效率暴涨小秘诀：用 Midjourney 与即梦 AI 双重创作 24 位行业 3D 形象 IP，搭配 13 张 APP 运营海报与 15 张主 KV（10 种材质风格），并产出可植入产品的动态视频。</p>
+            <div class="zcool-tags"><span>Midjourney</span><span>即梦 AI</span><span>3D 形象</span></div>
+            <span class="zcool-go">查看站酷作品 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- 关于 -->
+<section class="section" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-portrait reveal">
+        <video class="about-video" src="videos/about.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Ross Luo 个人动效视频"></video>
+      </div>
+      <div class="about-text">
+        <span class="eyebrow">About</span>
+        <h2 class="section-title">关于我</h2>
+        <p class="about-lead"><strong>全栈电商视觉运营</strong> / <strong>AI 驱动商业设计师</strong></p>
+        <p class="about-loc">目前定居湖南长沙</p>
+        <p class="about-intro">以 AI 串联电商运营、UI/UX、品牌、营销与内容的全链路设计交付，覆盖从店铺上架到品牌视觉的每一个环节。</p>
+
+        <div class="caps">
+          <div class="cap">
+            <button class="cap-head" type="button" aria-expanded="false"><span class="cap-no">①</span> AI 电商设计与店铺运营<span class="cap-toggle" aria-hidden="true"></span></button>
+            <div class="cap-body">
+              <p class="cap-desc">负责商品主图、SKU 图、详情页、活动页、店铺装修及商品上架；以及直播背景、直播贴片等系列设计。熟悉千牛、抖店后台运营、活动配置、店铺数据分析及客户沟通。</p>
+              <div class="cap-tools">
+                <span class="ct"><i>AI</i> GPT · Gemini · Claude · DeepSeek · Perplexity AI</span>
+                <span class="ct"><i>视觉</i> Midjourney · 即梦AI · 椒图AI</span>
+              </div>
+            </div>
+          </div>
+          <div class="cap">
+            <button class="cap-head" type="button" aria-expanded="false"><span class="cap-no">②</span> AI UI / UX 设计<span class="cap-toggle" aria-hidden="true"></span></button>
+            <div class="cap-body">
+              <p class="cap-desc">熟悉 Figma、MasterGo、Stitch，具备 Design System、设计规范、组件库、页面设计、原型设计及交互设计能力。</p>
+              <div class="cap-tools">
+                <span class="ct"><i>AI</i> GPT · Gemini · Claude</span>
+                <span class="ct"><i>UI</i> Figma · MasterGo · Stitch</span>
+              </div>
+            </div>
+          </div>
+          <div class="cap">
+            <button class="cap-head" type="button" aria-expanded="false"><span class="cap-no">③</span> AI 品牌视觉设计<span class="cap-toggle" aria-hidden="true"></span></button>
+            <div class="cap-body">
+              <p class="cap-desc">独立完成品牌定位、Logo、VI、IP、品牌视觉系统及线上线下营销物料设计。</p>
+              <div class="cap-tools">
+                <span class="ct"><i>AI</i> GPT · Gemini · Claude · DeepSeek</span>
+                <span class="ct"><i>视觉</i> Midjourney · 即梦AI · 腾讯Miora</span>
+              </div>
+            </div>
+          </div>
+          <div class="cap">
+            <button class="cap-head" type="button" aria-expanded="false"><span class="cap-no">④</span> AI 营销视觉设计<span class="cap-toggle" aria-hidden="true"></span></button>
+            <div class="cap-body">
+              <p class="cap-desc">负责海报、Banner、电商活动、公域运营及社媒视觉设计，快速完成创意策划与多方案输出。</p>
+              <div class="cap-tools">
+                <span class="ct"><i>AI</i> GPT · Perplexity AI</span>
+                <span class="ct"><i>视觉</i> Midjourney · 即梦AI</span>
+              </div>
+            </div>
+          </div>
+          <div class="cap">
+            <button class="cap-head" type="button" aria-expanded="false"><span class="cap-no">⑤</span> 商业项目管理<span class="cap-toggle" aria-hidden="true"></span></button>
+            <div class="cap-body">
+              <p class="cap-desc">具备需求分析、客户沟通、方案提案、印刷落地、供应商协同及项目管理能力，实现设计全流程交付。</p>
+              <div class="cap-tools">
+                <span class="ct"><i>AI</i> GPT · Claude · DeepSeek</span>
+              </div>
+            </div>
+          </div>
+          <div class="cap">
+            <button class="cap-head" type="button" aria-expanded="false"><span class="cap-no">⑥</span> AI 内容运营<span class="cap-toggle" aria-hidden="true"></span></button>
+            <div class="cap-body">
+              <p class="cap-desc">持续运营小红书、微信公众号、Instagram、X 等平台，关注 AI 工具、设计工作流及行业趋势。</p>
+              <div class="cap-tools">
+                <span class="ct"><i>AI</i> GPT · Gemini · Claude · Perplexity AI · DeepSeek</span>
+              </div>
+            </div>
+          </div>
+        </div>
+<div class="about-socials">
+          <a class="soc" href="mailto:183430592@qq.com" aria-label="邮箱" title="邮箱">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm9 7.2 8-5.2H4l8 5.2zM4 8.3V17h16V8.3l-8 5.2-8-5.2z"/></svg>
+            <span>邮箱</span>
+          </a>
+          <a class="soc" href="https://www.behance.net/1834305924cce" target="_blank" rel="noopener" aria-label="Behance" title="Behance">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3.32 1h4.917c1.348 0 2.598.579 2.598 2.021 0 1.04-.501 1.609-1.182 1.884 1.069.236 1.816.921 1.816 2.172 0 1.567-1.141 2.234-2.785 2.234H3.32V1Zm1.549 1.461v2.059h2.769c.701 0 1.167-.288 1.167-.997 0-.713-.489-1.062-1.167-1.062H4.869Zm0 3.519v2.257h3.059c.78 0 1.239-.381 1.239-1.103 0-.771-.529-1.154-1.239-1.154H4.869Zm5.951.668c.528 0 .954.214.954.754 0 .434-.316.677-.858.735l1.176.873v.709H9.433v-.635l1.025-.618c.393-.228.535-.354.535-.619 0-.289-.21-.444-.523-.444-.34 0-.538.18-.578.394h-.969c.04-.928.851-1.499 1.887-1.499Zm1.638-3.868v1.045h1.469V1.78h-1.469Zm1.469 6.262V6.928h-1.469v4.112h-1.128V6.928h-1.467v4.112h-1.137V6.252h6.201v4.788h-1.943Z"/></svg>
+            <span>Behance</span>
+          </a>
+          <a class="soc" href="https://dribbble.com/YOUTHLUO" target="_blank" rel="noopener" aria-label="Dribbble" title="Dribbble">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0a12 12 0 1 0 0 24 12 12 0 0 0 0-24zm7.93 5.53a10.16 10.16 0 0 1 2.3 6.32c-.34-.07-3.73-.76-7.15-.76-1.06 0-2.07.06-3.05.18 1.68-2.55 3.6-4.65 3.74-4.8a10.2 10.2 0 0 1 4.16-1.94zM12 1.86c2.6 0 4.98.98 6.78 2.58-.13.18-1.94 2.23-3.57 4.66-2.1-.8-4.45-1.24-6.95-1.3.78-2.1 2.46-4.3 3.74-5.94zM7.4 2.92a10.2 10.2 0 0 0-3.77 7.26c.42-.19 2.3-1.06 4.37-1.69.6-1.98 2.17-4.05 3.27-5.55A10.15 10.15 0 0 0 7.4 2.92zM1.72 12v-.27c.43-.02.95-.05 1.55-.05 1.04 0 2.97.1 4.5 1.1-.24.32-.47.65-.68.99-2.07.62-3.88 1.5-4.3 1.69A10.16 10.16 0 0 1 1.72 12zm10.28 10.14c-2.3 0-4.42-.78-6.1-2.08.27-.36 3.36-4.22 7.34-5.7 1.8 3.4 2.54 6.27 2.74 7.08a10.14 10.14 0 0 1-4 1.7zm5.53-1.62c-.13-.78-.83-3.55-2.56-6.9 2.4-.38 4.5.24 4.77.34a10.2 10.2 0 0 1-2.21 6.56z"/></svg>
+            <span>Dribbble</span>
+          </a>
+          <a class="soc" href="https://www.zcool.com.cn/u/14877158#tab_anchor" target="_blank" rel="noopener" aria-label="站酷" title="站酷">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 4h14v3l-9 8h9v3H5v-3l9-8H5z"/></svg>
+            <span>站酷</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 联系 -->
+<section class="section" id="contact">
+  <div class="container">
+    <div class="contact reveal">
+      <span class="eyebrow">Let's Talk</span>
+      <h2>有工作要找我吗？</h2>
+      <p>无论是电商/运营、产品界面、品牌营销、AI工作流~通通不在话下！欢迎随时沟通！</p>
+      <a class="email" href="mailto:183430592@qq.com">183430592@qq.com
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <div class="socials">
+        <a href="https://www.behance.net/1834305924cce" target="_blank" rel="noopener">Behance</a>
+        <span class="sep">/</span>
+        <a href="https://dribbble.com/YOUTHLUO" target="_blank" rel="noopener">Dribbble</a>
+        <span class="sep">/</span>
+        <a href="https://www.zcool.com.cn/u/14877158#tab_anchor" target="_blank" rel="noopener">站酷</a>
+        <span class="sep">/</span>
+        <a href="mailto:183430592@qq.com">邮箱</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- 页脚 -->
+<footer class="footer">
+  <div class="container footer-inner">
+    <a href="#top" class="logo"><span class="logo-mark" aria-hidden="true"></span>Ross的研习社<span style="color:var(--color-primary)">.</span></a>
+    <span>© 2026 Ross Luo · Ross的研习社 · 长沙</span>
+    <span>作品图源自 Behance · 文章以 Markdown 撰写并即时渲染</span>
+  </div>
+</footer>
+
+<!-- 返回顶部 -->
+<button class="back-to-top" id="backToTop" type="button" aria-label="返回顶部" title="返回顶部">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 14 12 8 18 14"/></svg>
+</button>
+
+<!-- 作品详情弹窗 -->
+<div class="modal" id="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="作品详情">
+  <div class="modal-overlay" data-close></div>
+  <div class="modal-panel">
+    <header class="modal-head">
+      <button class="modal-back" data-close type="button" aria-label="返回作品列表">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        <span>返回</span>
+      </button>
+      <a class="modal-behance" id="modalBehance" target="_blank" rel="noopener">在 Behance 查看
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H9M17 7v8"/></svg>
+      </a>
+    </header>
+    <div class="modal-body" id="modalBody">
+      <!-- 由 JS 注入 -->
+    </div>
+  </div>
+</div>
+
+<!-- 文章阅读弹窗（Markdown 渲染） -->
+<div class="modal" id="postModal" aria-hidden="true" role="dialog" aria-modal="true" aria-label="文章阅读">
+  <div class="modal-overlay" data-post-close></div>
+  <div class="modal-panel">
+    <header class="modal-head">
+      <button class="modal-back" data-post-close type="button" aria-label="返回文章列表">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        <span>返回</span>
+      </button>
+      <span class="post-modal-badge">Markdown 渲染</span>
+    </header>
+    <div class="modal-body" id="postModalBody">
+      <!-- 由 JS 注入 -->
+    </div>
+  </div>
+</div>
+
+<script src="js/projects.js"></script>
+<script src="js/markdown.js"></script>
+<script src="js/posts.js"></script>
+<script src="js/videos.js"></script>
+<script src="js/notes.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
