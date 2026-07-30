@@ -384,7 +384,8 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
   box-shadow: var(--shadow-md);
   position: relative;
 }
-.hero-thumbs a:nth-child(1) { grid-row: span 2; aspect-ratio: 3 / 4.4; }
+.hero-thumbs a:nth-child(1) { grid-row: span 2; align-self: stretch; aspect-ratio: auto; }
+.hero-thumbs a:nth-child(1) img { height: 100%; object-fit: cover; }
 .hero-thumbs img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--transition); }
 .hero-thumbs a:hover img { transform: scale(1.04); }
 .hero-thumbs .thumb-label {
