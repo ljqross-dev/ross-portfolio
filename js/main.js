@@ -821,4 +821,50 @@
     var n = (window.DRIBBBLE && window.DRIBBBLE.shots) ? window.DRIBBBLE.shots.length : 0;
     if (n > 0) el.textContent = String(n);
   })();
+
+  /* ============================================================
+     GitHub Star 数 · 实时拉取
+     公开仓库支持 CORS 直连，无需后端；localStorage 缓存 1 小时，
+     API 失败/限流时回退到真实初始值（1）。
+     ============================================================ */
+  (function githubStars() {
+    var el = document.getElementById('ghStarCount');
+    if (!el) return;
+    var CACHE_KEY = 'ross_gh_stars';
+    var CACHE_TTL = 3600 * 1000; // 1 小时
+    var FALLBACK = 1;            // 真实初始 star 数，API 失败时使用
+    var API = 'https://api.github.com/repos/ljqross-dev/ross-portfolio';
+
+    function render(n) {
+      if (typeof n === 'number' && n >= 0) el.textContent = String(n);
+    }
+
+    // 1) 先读缓存：命中且未过期则直接用，跳过请求
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      if (raw) {
+        var c = JSON.parse(raw);
+        if (c && typeof c.count === 'number' && (Date.now() - c.ts) < CACHE_TTL) {
+          render(c.count);
+          return;
+        }
+      }
+    } catch (e) { /* 忽略缓存读取错误 */ }
+
+    // 2) 缓存未命中/过期 → 请求 GitHub API
+    if (typeof fetch !== 'function') { render(FALLBACK); return; }
+    fetch(API, { headers: { 'Accept': 'application/vnd.github+json' } })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (d) {
+        var n = (d && typeof d.stargazers_count === 'number') ? d.stargazers_count : FALLBACK;
+        render(n);
+        try { localStorage.setItem(CACHE_KEY, JSON.stringify({ count: n, ts: Date.now() })); } catch (e) { /* 静默 */ }
+      })
+      .catch(function () {
+        render(FALLBACK); // 失败保留默认真实值，不报错
+      });
+  })();
 })();
