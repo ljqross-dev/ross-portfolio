@@ -1,0 +1,94 @@
+[1/1] 远程执行: ross - targz . ../ross-site.tar.gz
+已连接到远程机器: ross
+[1/9] 远程执行: ross - targz . ../ross-site.tar.gz
+开始执行远程命令 [1/9]: targz . ../ross-site.tar.gz
+执行特殊命令	targz . ../ross-site.tar.gz
+压缩成功
+远程命令执行完成: targz . ../ross-site.tar.gz
+[2/9] 远程执行: ross - upload ../ross-site.tar.gz /tmp/ross-site.tar.gz
+开始执行远程命令 [2/9]: upload ../ross-site.tar.gz /tmp/ross-site.tar.gz
+执行特殊命令	upload ../ross-site.tar.gz /tmp/ross-site.tar.gz
+进度: 0.15%, 速度: 128000.00 KB/s
+进度: 0.30%, 速度: 463.60 KB/s
+进度: 0.74%, 速度: 687.12 KB/s
+进度: 1.48%, 速度: 1003.21 KB/s
+进度: 2.81%, 速度: 1646.43 KB/s
+进度: 4.58%, 速度: 2365.57 KB/s
+进度: 5.02%, 速度: 2130.90 KB/s
+进度: 7.68%, 速度: 2772.40 KB/s
+进度: 10.04%, 速度: 3082.41 KB/s
+进度: 10.93%, 速度: 2933.25 KB/s
+进度: 13.44%, 速度: 3044.64 KB/s
+进度: 15.95%, 速度: 3302.86 KB/s
+进度: 18.46%, 速度: 3513.92 KB/s
+进度: 21.12%, 速度: 3558.73 KB/s
+进度: 23.48%, 速度: 3698.53 KB/s
+进度: 25.99%, 速度: 3696.50 KB/s
+进度: 28.50%, 速度: 3826.67 KB/s
+进度: 30.86%, 速度: 3893.35 KB/s
+进度: 33.22%, 速度: 3957.93 KB/s
+进度: 35.29%, 速度: 3812.36 KB/s
+进度: 35.73%, 速度: 3670.89 KB/s
+进度: 38.10%, 速度: 3753.33 KB/s
+进度: 40.46%, 速度: 3807.57 KB/s
+进度: 42.97%, 速度: 3910.83 KB/s
+进度: 45.33%, 速度: 3883.29 KB/s
+进度: 47.84%, 速度: 3889.57 KB/s
+进度: 50.35%, 速度: 3956.98 KB/s
+进度: 52.72%, 速度: 4011.87 KB/s
+进度: 55.08%, 速度: 4043.78 KB/s
+进度: 57.44%, 速度: 4092.67 KB/s
+进度: 58.03%, 速度: 3998.76 KB/s
+进度: 60.54%, 速度: 4072.33 KB/s
+进度: 62.17%, 速度: 4065.34 KB/s
+进度: 64.53%, 速度: 4109.67 KB/s
+进度: 66.89%, 速度: 4133.68 KB/s
+进度: 69.25%, 速度: 4186.62 KB/s
+进度: 71.62%, 速度: 4247.93 KB/s
+进度: 73.98%, 速度: 4308.80 KB/s
+进度: 76.34%, 速度: 4301.34 KB/s
+进度: 78.85%, 速度: 4289.98 KB/s
+进度: 81.22%, 速度: 4260.43 KB/s
+进度: 83.73%, 速度: 4298.71 KB/s
+进度: 86.09%, 速度: 4325.95 KB/s
+进度: 88.16%, 速度: 4370.38 KB/s
+进度: 90.52%, 速度: 4341.94 KB/s
+进度: 92.88%, 速度: 4357.33 KB/s
+进度: 95.24%, 速度: 4348.73 KB/s
+进度: 97.61%, 速度: 4375.82 KB/s
+进度: 100.00%, 速度: 4322.16 KB/s
+进度: 100.00%, 速度: 4273.52 KB/s
+将文件从..\ross-site.tar.gz传输至/tmp/ross-site.tar.gz共84.65 MB
+远程命令执行完成: upload ../ross-site.tar.gz /tmp/ross-site.tar.gz
+[3/9] 远程执行: ross - mkdir -p /usr/share/nginx/html
+开始执行远程命令 [3/9]: mkdir -p /usr/share/nginx/html
+执行命令	mkdir -p /usr/share/nginx/html
+远程命令执行完成: mkdir -p /usr/share/nginx/html
+[4/9] 远程执行: ross - rm -rf /usr/share/nginx/html/*
+开始执行远程命令 [4/9]: rm -rf /usr/share/nginx/html/*
+执行命令	rm -rf /usr/share/nginx/html/*
+远程命令执行完成: rm -rf /usr/share/nginx/html/*
+[5/9] 远程执行: ross - tar -xzf /tmp/ross-site.tar.gz -C /usr/share/nginx/html
+开始执行远程命令 [5/9]: tar -xzf /tmp/ross-site.tar.gz -C /usr/share/nginx/html
+执行命令	tar -xzf /tmp/ross-site.tar.gz -C /usr/share/nginx/html
+远程命令执行完成: tar -xzf /tmp/ross-site.tar.gz -C /usr/share/nginx/html
+[6/9] 远程执行: ross - rm -rf /usr/share/nginx/html/.git
+开始执行远程命令 [6/9]: rm -rf /usr/share/nginx/html/.git
+执行命令	rm -rf /usr/share/nginx/html/.git
+远程命令执行完成: rm -rf /usr/share/nginx/html/.git
+[7/9] 远程执行: ross - rm -rf /usr/share/nginx/html/git
+开始执行远程命令 [7/9]: rm -rf /usr/share/nginx/html/git
+执行命令	rm -rf /usr/share/nginx/html/git
+远程命令执行完成: rm -rf /usr/share/nginx/html/git
+[8/9] 远程执行: ross - rm -f /tmp/ross-site.tar.gz
+开始执行远程命令 [8/9]: rm -f /tmp/ross-site.tar.gz
+执行命令	rm -f /tmp/ross-site.tar.gz
+远程命令执行完成: rm -f /tmp/ross-site.tar.gz
+[9/9] 远程执行: ross - nginx -s reload
+开始执行远程命令 [9/9]: nginx -s reload
+执行命令	nginx -s reload
+远程命令执行完成: nginx -s reload
+[10/9] 远程执行完成: ross
+所有远程命令执行完毕，机器: ross
+[2/1] 执行完毕
+上传站点执行完毕
