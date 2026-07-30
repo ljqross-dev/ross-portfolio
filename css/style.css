@@ -237,14 +237,17 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
   align-items: center;
   text-decoration: none;
 }
-.logo-img {
-  height: 40px;
-  width: auto;
+.logo .logo-img {
+  display: block;
+  height: 40px !important;
+  width: auto !important;
+  max-width: 160px;
   object-fit: contain;
   flex-shrink: 0;
 }
-.logo-img--sm {
-  height: 28px;
+.logo .logo-img--sm {
+  height: 28px !important;
+  max-width: 112px;
 }
 .logo:hover { opacity: 0.85; }
 
