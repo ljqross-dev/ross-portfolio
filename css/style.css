@@ -1144,7 +1144,7 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
 /* ============================================================
    AI Design News 版块 — 紧凑布局，每条配缩略图
    ============================================================ */
-.section--news { padding-top: 0; }
+.section--news { padding-bottom: clamp(var(--space-10), 4vw, var(--space-20)); }
 
 /* 卡片容器 — 固定 24px 内边距 */
 .ainews-card {

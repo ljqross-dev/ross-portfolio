@@ -21,7 +21,7 @@
 
   var CACHE_KEY = 'ross_ai_news_cache';
   var CACHE_TTL = 6 * 60 * 60 * 1000; // 6 小时
-  var MAX_NEWS = 8;
+  var MAX_NEWS = 6;
 
   // RSS 源配置
   var RSS_SOURCES = [
