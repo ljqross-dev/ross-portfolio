@@ -204,10 +204,10 @@
       var tagDotClass = isNew(item.date) ? 'ainews-tag-dot ainews-tag-dot--new' : 'ainews-tag-dot';
       var timeStr = timeAgo(item.date);
       var metaLine = '<span class="ainews-meta-source">' + esc(item.source) + '</span><span class="ainews-meta-sep">·</span><span class="ainews-meta-time">' + timeStr + '</span>';
+      var imgSrc = item.image || getDefaultImage(index);
 
       if (isFirst) {
-        // Featured 卡片：左图右文
-        var imgSrc = item.image || getDefaultImage(index);
+        // Featured 第一条：左图右文
         html += '<a class="ainews-featured" href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer">' +
           '<div class="ainews-featured-img-wrap">' +
             '<img class="ainews-featured-img" src="' + esc(imgSrc) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'" />' +
@@ -223,7 +223,7 @@
           '</div>' +
         '</a>';
       } else {
-        // 普通条目：文本列表
+        // 普通条目：左文右图
         html += '<a class="ainews-item" href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer">' +
           '<div class="ainews-item-main">' +
             '<div class="ainews-item-tagline">' +
@@ -231,8 +231,11 @@
               '<span class="ainews-item-tag">' + esc(item.tag || 'AI') + '</span>' +
             '</div>' +
             '<h4 class="ainews-item-title">' + esc(item.title) + '</h4>' +
+            '<div class="ainews-item-meta">' + metaLine + '</div>' +
           '</div>' +
-          '<div class="ainews-item-meta">' + metaLine + '</div>' +
+          '<div class="ainews-item-thumb">' +
+            '<img class="ainews-item-thumb-img" src="' + esc(imgSrc) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'" />' +
+          '</div>' +
         '</a>';
       }
     });
