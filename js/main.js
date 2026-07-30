@@ -407,6 +407,34 @@
     });
     var av = document.querySelector('.about-video');
     if (av) { var pa = av.play(); if (pa && typeof pa.catch === 'function') pa.catch(function () {}); }
+
+    /* 视频展开/收起 */
+    var expandedVideo = false;
+    function applyLimitVideo() {
+      var cards = Array.prototype.slice.call(grid.querySelectorAll('.video-card'));
+      var twoRows = gridCols() * 2;
+      if (!expandedVideo) {
+        cards.forEach(function (c, i) {
+          if (i >= twoRows) c.setAttribute('hidden', '');
+          else c.removeAttribute('hidden');
+        });
+      } else {
+        cards.forEach(function (c) { c.removeAttribute('hidden'); });
+      }
+      var btn = document.getElementById('videoExpandBtn');
+      if (btn) {
+        if (cards.length > twoRows) {
+          btn.hidden = false;
+          btn.textContent = expandedVideo ? '收起' : '展开全部';
+        } else {
+          btn.hidden = true;
+        }
+      }
+    }
+    applyLimitVideo();
+    var vb = document.getElementById('videoExpandBtn');
+    if (vb) vb.addEventListener('click', function () { expandedVideo = !expandedVideo; applyLimitVideo(); });
+    window.addEventListener('resize', function () { applyLimitVideo(); });
   })();
 
   /* ============================================================
@@ -961,5 +989,46 @@
   window.addEventListener('load', function () {
     applyLimitWork();
     applyLimitBlog();
+  });
+
+  /* ============================================================
+     AI Design News 初始化
+     ============================================================ */
+  (function () {
+    if (typeof window.initAiNews === 'function') {
+      window.initAiNews();
+    }
+    var refreshBtn = document.getElementById('aiNewsRefresh');
+    if (refreshBtn && typeof window.fetchAiNews === 'function') {
+      refreshBtn.addEventListener('click', function () {
+        refreshBtn.style.transform = 'rotate(360deg)';
+        refreshBtn.style.transition = 'transform .5s ease';
+        setTimeout(function () { refreshBtn.style.transform = ''; refreshBtn.style.transition = ''; }, 500);
+        window.fetchAiNews().then(window.renderAiNews);
+      });
+    }
+  })();
+
+  /* ============================================================
+     禁止右键保存 / 拖拽图片和视频
+     ============================================================ */
+  document.addEventListener('contextmenu', function (e) {
+    var t = e.target;
+    if (t.tagName === 'IMG' || t.tagName === 'VIDEO' ||
+        (t.parentElement && (t.parentElement.tagName === 'IMG' || t.parentElement.tagName === 'VIDEO'))) {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('dragstart', function (e) {
+    var t = e.target;
+    if (t.tagName === 'IMG' || t.tagName === 'VIDEO') {
+      e.preventDefault();
+    }
+  });
+  document.addEventListener('selectstart', function (e) {
+    var t = e.target;
+    if (t.tagName === 'IMG' || t.tagName === 'VIDEO') {
+      e.preventDefault();
+    }
   });
 })();

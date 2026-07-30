@@ -129,6 +129,30 @@
   </div>
 </section>
 
+<!-- AI Design News -->
+<section class="section section--news" id="aiNews">
+  <div class="container">
+    <div class="ainews-card">
+      <div class="ainews-header">
+        <div class="ainews-title-wrap">
+          <span class="ainews-icon">&#128293;</span>
+          <h3 class="ainews-heading">AI Design News</h3>
+          <span class="ainews-count" id="aiNewsCount"></span>
+        </div>
+        <button class="ainews-refresh" id="aiNewsRefresh" type="button" title="刷新资讯" aria-label="刷新资讯">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        </button>
+      </div>
+      <div class="ainews-list" id="aiNewsList">
+        <div class="ainews-loading">正在加载最新资讯...</div>
+      </div>
+      <a class="ainews-more" href="https://www.techcrunch.com/category/artificial-intelligence/" target="_blank" rel="noopener noreferrer">
+        查看全部 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
 <!-- 作品 -->
 <section class="section" id="work">
   <div class="container">
@@ -172,6 +196,9 @@
     </div>
     <div class="video-grid" id="videoGrid">
       <!-- 由 JS 注入 -->
+    </div>
+    <div class="expand-wrap">
+      <button class="expand-btn" id="videoExpandBtn" type="button" hidden>展开全部</button>
     </div>
   </div>
 </section>
@@ -611,6 +638,7 @@
 <script src="js/videos.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/dribbble.js"></script>
+<script src="js/ai-news.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

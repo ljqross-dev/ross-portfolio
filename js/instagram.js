@@ -17,28 +17,28 @@ window.INSTAGRAM = {
   posts: [
     // ===== UI 设计 =====
     { id: "i1", title: "Internet UI Style Backgrounds — Part 20", cat: "ui-design",
-      cover: "https://cdn.dribbble.com/userupload/48424688/file/29bc8f5b775956cb341fe99e51960aa7.jpg",
+      cover: "images/dribbble/29bc8f5b775956cb341fe99e51960aa7.jpg",
       link: "https://www.instagram.com/p/",
       likes: 89, comments: 12, date: "2026-07-15",
       images: [
-        "https://cdn.dribbble.com/userupload/48424688/file/29bc8f5b775956cb341fe99e51960aa7.jpg"
+        "images/dribbble/29bc8f5b775956cb341fe99e51960aa7.jpg"
       ] },
 
     { id: "i2", title: "Internet UI Style Icons — Glass Texture Series", cat: "ui-design",
-      cover: "https://cdn.dribbble.com/userupload/47980093/file/65f359188d29c5cee5644ab3afd4f76e.jpg",
+      cover: "images/dribbble/65f359188d29c5cee5644ab3afd4f76e.jpg",
       link: "https://www.instagram.com/p/",
       likes: 156, comments: 23, date: "2026-06-20",
       images: [
-        "https://cdn.dribbble.com/userupload/47980093/file/65f359188d29c5cee5644ab3afd4f76e.jpg",
-        "https://cdn.dribbble.com/userupload/47980094/file/sample2.jpg"
+        "images/dribbble/65f359188d29c5cee5644ab3afd4f76e.jpg",
+        "images/dribbble/65f359188d29c5cee5644ab3afd4f76e.jpg"
       ] },
 
     { id: "i3", title: "Mobile App UI Exploration — Dashboard", cat: "ui-design",
-      cover: "https://cdn.dribbble.com/userupload/47904384/file/56d3541172590ac97f5b65bd79dd6d05.jpg",
+      cover: "images/dribbble/56d3541172590ac97f5b65bd79dd6d05.jpg",
       link: "https://www.instagram.com/p/",
       likes: 67, comments: 8, date: "2026-05-10",
       images: [
-        "https://cdn.dribbble.com/userupload/47904384/file/56d3541172590ac97f5b65bd79dd6d05.jpg"
+        "images/dribbble/56d3541172590ac97f5b65bd79dd6d05.jpg"
       ] },
 
     // ===== 品牌作品 =====
@@ -56,27 +56,27 @@ window.INSTAGRAM = {
 
     // ===== AI 艺术 =====
     { id: "i6", title: "AIGC Dodo Bird — Pixar Style Animation", cat: "ai-art",
-      cover: "https://cdn.dribbble.com/userupload/47718417/file/still-d3a61e8d5a2d9d79362aa1c61381d5d5.png",
+      cover: "images/instagram/65f359188d29c5cee5644ab3afd4f76e.jpg",
       link: "https://www.instagram.com/p/",
       likes: 312, comments: 45, date: "2026-02-08",
       images: [
-        "https://cdn.dribbble.com/userupload/47718417/file/still-d3a61e8d5a2d9d79362aa1c61381d5d5.png"
+        "images/instagram/65f359188d29c5cee5644ab3afd4f76e.jpg"
       ] },
 
     { id: "i7", title: "GPT Image 2 + Seedance — Cat Story", cat: "ai-art",
-      cover: "https://cdn.dribbble.com/userupload/47671327/file/still-e6d35a103279837c91f173408ed6d208.png",
+      cover: "images/instagram/still-e6d35a103279837c91f173408ed6d208.png",
       link: "https://www.instagram.com/p/",
       likes: 267, comments: 38, date: "2026-01-25",
       images: [
-        "https://cdn.dribbble.com/userupload/47671327/file/still-e6d35a103279837c91f173408ed6d208.png"
+        "images/instagram/still-e6d35a103279837c91f173408ed6d208.png"
       ] },
 
     { id: "i8", title: "Ink Painting Style — Skateboard Girl", cat: "ai-art",
-      cover: "https://cdn.dribbble.com/userupload/47303847/file/still-663ecbd07d5eb45c80b889b6fb76f8ef.png",
+      cover: "images/instagram/still-663ecbd07d5eb45c80b889b6fb76f8ef.png",
       link: "https://www.instagram.com/p/",
       likes: 198, comments: 27, date: "2025-12-15",
       images: [
-        "https://cdn.dribbble.com/userupload/47303847/file/still-663ecbd07d5eb45c80b889b6fb76f8ef.png"
+        "images/instagram/still-663ecbd07d5eb45c80b889b6fb76f8ef.png"
       ] },
 
     // ===== 日常 =====

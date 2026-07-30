@@ -18,11 +18,11 @@ window.TWITTER = {
     // ===== 设计干货 =====
     { id: "t1", title: "UI 背景设计的 10 个层次感技巧", cat: "design-tips",
       text: "做 UI 背景不只是堆渐变。分享我常用的 10 个增加层次感的方法：\n\n1. 前景模糊球体（Glassmorphism）\n2. 中景网格/点阵\n3. 远景低饱和色块\n4. 光源从一角打入\n5. 噪点纹理叠加\n6. 微妙的环境光反射\n7. 深度模糊分层\n8. 动态粒子飘浮\n9. 几何线条引导\n10. 品牌色渗透\n\n每一条都能让你的背景从「平」变「有呼吸感」。",
-      cover: "https://cdn.dribbble.com/userupload/48424688/file/29bc8f5b775956cb341fe99e51960aa7.jpg",
+      cover: "images/dribbble/29bc8f5b775956cb341fe99e51960aa7.jpg",
       link: "https://x.com/Ross21118765/status/",
       likes: 342, retweets: 89, replies: 45, views: "12.3K", date: "2026-07-20",
       images: [
-        "https://cdn.dribbble.com/userupload/48424688/file/29bc8f5b775956cb341fe99e51960aa7.jpg"
+        "images/dribbble/29bc8f5b775956cb341fe99e51960aa7.jpg"
       ] },
 
     { id: "t2", title: "电商主图的「一眼惊艳」公式", cat: "design-tips",
@@ -42,20 +42,20 @@ window.TWITTER = {
     // ===== AI 工具 =====
     { id: "t4", title: "GPT Image 2.0 真实体验报告", cat: "ai-tools",
       text: "用了 GPT Image 2.0 一个月，说几句真话：\n\n✅ 文字渲染终于能用了（中文也行）\n✅ 风格一致性比 MJ 好\n✅ 对设计需求的理解更准确\n⚠️ 复杂构图偶尔翻车\n⚠️ 细节精度仍需后期修\n\n我的工作流现在是：GPT 定方向 → MJ 出素材 → 即梦做动效。",
-      cover: "https://cdn.dribbble.com/userupload/47671327/file/still-e6d35a103279837c91f173408ed6d208.png",
+      cover: "images/dribbble/still-e6d35a103279837c91f173408ed6d208.png",
       link: "https://x.com/Ross21118765/status/",
       likes: 789, retweets: 201, replies: 134, views: "45.6K", date: "2026-05-10",
       images: [
-        "https://cdn.dribbble.com/userupload/47671327/file/still-e6d35a103279837c91f173408ed6d208.png"
+        "images/dribbble/still-e6d35a103279837c91f173408ed6d208.png"
       ] },
 
     { id: "t5", title: "即梦 AI 动效工作流全公开", cat: "ai-tools",
       text: "很多人问我动效怎么做，今天把流程全公开：\n\n1️⃣ GPT 写分镜脚本（场景描述+镜头语言）\n2️⃣ GPT Image 2 出关键帧\n3️⃣ 即梦 Seedance 2.0 生成视频\n4️⃣ 剪映拼接+音效+字幕\n\n一条 15s 的品牌动效，从想法到成片只要 2 小时。\n\n效率提升的关键不是工具，是流程标准化。",
-      cover: "https://cdn.dribbble.com/userupload/47303741/file/still-cf65e40db33750299b9fc8b833963d0a.png",
+      cover: "images/twitter/29bc8f5b775956cb341fe99e51960aa7.jpg",
       link: "https://x.com/Ross21118765/status/",
       likes: 612, retweets: 167, replies: 98, views: "38.9K", date: "2026-04-22",
       images: [
-        "https://cdn.dribbble.com/userupload/47303741/file/still-cf65e40db33750299b9fc8b833963d0a.png"
+        "images/twitter/29bc8f5b775956cb341fe99e51960aa7.jpg"
       ] },
 
     // ===== 工作日志 =====
