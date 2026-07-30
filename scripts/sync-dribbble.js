@@ -20,6 +20,9 @@ const { execSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const OUT_FILE = path.join(ROOT, 'js', 'dribbble.js');
 const CACHE_FILE = path.join(ROOT, 'js', '.dribbble-cache.json');
+// 图片本地自托管目录：把 Dribbble 头像/封面下载到站点 images/dribbble/，
+// 与 Logo/Favicon 一致「存服务器」，彻底摆脱 cdn.dribbble.com 的防盗链/跨域限制。
+const IMG_DIR = path.join(ROOT, 'images', 'dribbble');
 
 const USERNAME = 'YOUTHLUO';
 const CATEGORIES = [
@@ -90,6 +93,26 @@ function stripHtml(html) {
   return String(html).replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 }
 
+// ---------- 下载图片到本地（自托管）----------
+// 仅当下载成功才返回本地相对路径；失败返回原 URL，保证不破坏已有数据。
+async function downloadImage(url, fileName) {
+  if (!url) return url;
+  try {
+    if (!fs.existsSync(IMG_DIR)) fs.mkdirSync(IMG_DIR, { recursive: true });
+    const res = await fetch(url, { headers: { 'Referer': '' }, referrerPolicy: 'no-referrer' });
+    if (!res.ok) { console.warn(`[sync] 图片下载跳过(${res.status}): ${url}`); return url; }
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (!buf || buf.length < 500) { console.warn(`[sync] 图片无效(过小): ${url}`); return url; }
+    const dest = path.join(IMG_DIR, fileName);
+    fs.writeFileSync(dest, buf);
+    console.log(`[sync] 已下载图片 -> images/dribbble/${fileName} (${buf.length}B)`);
+    return `images/dribbble/${fileName}`;
+  } catch (e) {
+    console.warn(`[sync] 图片下载失败，保留 CDN 地址: ${url} (${e.message})`);
+    return url;
+  }
+}
+
 function mapShot(s) {
   const imgs = s.images || {};
   const cover = imgs.normal || imgs.hidpi || imgs.teaser || '';
@@ -135,13 +158,35 @@ function deploy() {
     const shots = await fetchShots(token, userRef);
     if (!shots.length) throw new Error('未获取到任何 shots');
 
+    // 先映射数据，再逐个把封面/头像下载到本地（自托管）
+    const mapped = shots.map(mapShot);
     const payload = {
       author: 'Ross (YOUTHLUO)',
       profile: 'https://dribbble.com/YOUTHLUO',
       avatar: 'https://cdn.dribbble.com/users/3249524/avatars/normal/8d9db190d9e1e6db08ec080eab693a2d.jpg',
       categories: CATEGORIES,
-      shots: shots.map(mapShot)
+      shots: mapped
     };
+
+    // 自托管：下载头像 + 每个 shot 的封面与详情图（仅成功才改写路径）
+    console.log('[sync] 开始自托管图片（下载到 images/dribbble/）…');
+    payload.avatar = await downloadImage(payload.avatar, 'avatar.jpg');
+    for (const s of payload.shots) {
+      const coverLocal = await downloadImage(s.cover, s.id + '.jpg');
+      s.cover = coverLocal;
+      if (Array.isArray(s.images) && s.images.length) {
+        const bigUrl = s.images[0];
+        const bigLocal = (bigUrl && bigUrl !== coverLocal)
+          ? await downloadImage(bigUrl, s.id + '-full.jpg')
+          : coverLocal;
+        s.images = s.images.map(function (u) {
+          if (u === bigUrl) return bigLocal;
+          if (u === s.cover) return coverLocal;
+          return u;
+        });
+      }
+    }
+    console.log('[sync] 图片自托管完成。');
 
     const hash = crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex').slice(0, 16);
 

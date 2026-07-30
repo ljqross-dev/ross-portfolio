@@ -985,6 +985,27 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
   border-color: transparent;
 }
 .post-card[hidden] { display: none; }
+
+/* 展开全部 / 收起 按钮（作品、文章通用） */
+.expand-wrap { display: flex; justify-content: center; margin-top: var(--space-10); }
+.expand-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 24px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border, rgba(0,0,0,.15));
+  background: transparent;
+  color: var(--color-primary, #E2553B);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: .01em;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.expand-btn:hover {
+  border-color: var(--color-primary, #E2553B);
+  background: color-mix(in oklab, var(--color-primary) 8%, transparent);
+}
+.expand-btn[hidden] { display: none; }
 .post-card .post-cat {
   font-size: var(--text-xs);
   letter-spacing: 0.08em;

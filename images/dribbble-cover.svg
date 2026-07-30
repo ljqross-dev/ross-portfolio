@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Dribbble 作品占位图">
+  <rect width="400" height="300" fill="#F2EFE9"/>
+  <circle cx="200" cy="135" r="34" fill="none" stroke="#C8C2B8" stroke-width="3"/>
+  <path d="M183 135l12 12 22-24" fill="none" stroke="#C8C2B8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="200" y="200" font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-size="17" fill="#B3ADA1" text-anchor="middle">Dribbble 作品</text>
+</svg>
