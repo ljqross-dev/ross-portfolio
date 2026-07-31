@@ -113,64 +113,9 @@
   })();
 
   /* 作品网格自适应列数 */
-  /* 两行折叠 + 展开全部（作品 / 文章 通用） */
-  var expandedWork = false;
-  var expandedBlog = false;
-
   function gridCols() {
     var w = window.innerWidth;
     return w <= 560 ? 1 : (w <= 980 ? 2 : 3);
-  }
-
-  function applyLimitWork() {
-    var grid = document.getElementById('workGrid');
-    if (!grid) return;
-    var cards = Array.prototype.slice.call(grid.querySelectorAll('.work-card'));
-    var vis = cards.filter(function (c) { return !c.hasAttribute('hidden'); });
-    var twoRows = gridCols() * 2;
-    if (!expandedWork) {
-      vis.forEach(function (c, i) {
-        if (i >= twoRows) c.setAttribute('hidden', '');
-        else c.removeAttribute('hidden');
-      });
-    } else {
-      vis.forEach(function (c) { c.removeAttribute('hidden'); });
-    }
-    var btn = document.getElementById('workExpandBtn');
-    if (btn) {
-      if (vis.length > twoRows) {
-        btn.hidden = false;
-        btn.textContent = expandedWork ? '收起' : '展开全部';
-      } else {
-        btn.hidden = true;
-      }
-    }
-    layoutWorkGrid();
-  }
-
-  function applyLimitBlog() {
-    var grid = document.getElementById('blogGrid');
-    if (!grid) return;
-    var cards = Array.prototype.slice.call(grid.querySelectorAll('.post-card'));
-    var vis = cards.filter(function (c) { return !c.hasAttribute('hidden'); });
-    var twoRows = gridCols() * 2;
-    if (!expandedBlog) {
-      vis.forEach(function (c, i) {
-        if (i >= twoRows) c.setAttribute('hidden', '');
-        else c.removeAttribute('hidden');
-      });
-    } else {
-      vis.forEach(function (c) { c.removeAttribute('hidden'); });
-    }
-    var btn = document.getElementById('blogExpandBtn');
-    if (btn) {
-      if (vis.length > twoRows) {
-        btn.hidden = false;
-        btn.textContent = expandedBlog ? '收起' : '展开全部';
-      } else {
-        btn.hidden = true;
-      }
-    }
   }
 
   function layoutWorkGrid() {
@@ -188,8 +133,6 @@
   }
   window.addEventListener('resize', function () {
     layoutWorkGrid();
-    applyLimitWork();
-    applyLimitBlog();
   });
 
   /* 作品网格 */
@@ -207,9 +150,6 @@
         '</div></a>';
     }).join('');
     layoutWorkGrid();
-    applyLimitWork();
-    var wb = document.getElementById('workExpandBtn');
-    if (wb) wb.addEventListener('click', function () { expandedWork = !expandedWork; applyLimitWork(); });
   })();
 
   /* 分类筛选 */
@@ -221,14 +161,13 @@
       btn.addEventListener('click', function () {
         btns.forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
-        expandedWork = false;
         var f = btn.getAttribute('data-filter');
         cards().forEach(function (c) {
           var match = f === 'all' || c.getAttribute('data-cat') === f;
           if (match) c.removeAttribute('hidden');
           else c.setAttribute('hidden', '');
         });
-        applyLimitWork();
+        layoutWorkGrid();
       });
     });
   })();
@@ -315,9 +254,6 @@
         '<span class="post-read">阅读全文 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span></div>' +
         '</button>';
     }).join('');
-    applyLimitBlog();
-    var bb = document.getElementById('blogExpandBtn');
-    if (bb) bb.addEventListener('click', function () { expandedBlog = !expandedBlog; applyLimitBlog(); });
   })();
 
   /* 文章分类筛选 */
@@ -341,7 +277,6 @@
       subBtns = subBox.querySelectorAll('.subfilter-btn');
       subBtns.forEach(function (b) {
         b.addEventListener('click', function () {
-          expandedBlog = false;
           subBtns.forEach(function (x) { x.classList.remove('active'); });
           b.classList.add('active');
           activeSub = b.getAttribute('data-subfilter');
@@ -364,13 +299,11 @@
         if (show) c.removeAttribute('hidden');
         else c.setAttribute('hidden', '');
       });
-      applyLimitBlog();
     }
 
     if (!topBtns.length) return;
     topBtns.forEach(function (btn) {
       btn.addEventListener('click', function () {
-        expandedBlog = false;
         topBtns.forEach(function (b) { b.classList.remove('active'); });
         btn.classList.add('active');
         activeTop = btn.getAttribute('data-bfilter');
@@ -978,17 +911,9 @@
       });
   })();
 
-  /* ============================================================
-     折叠初始化（双保险）
-     确保「作品 / 文章」在默认（全部）视图下：
-     ① 仅展示两行；② 超两行时显示「展开全部」按钮。
-     脚本底部与 window.load 各执行一次，规避任何时序/缓存导致的初始状态异常。
-     ============================================================ */
-  applyLimitWork();
-  applyLimitBlog();
+  /* 窗口加载完成后执行一次布局 */
   window.addEventListener('load', function () {
-    applyLimitWork();
-    applyLimitBlog();
+    layoutWorkGrid();
   });
 
   /* ============================================================
