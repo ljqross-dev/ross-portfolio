@@ -1,0 +1,14 @@
+[Unit]
+Description=Ross Guestbook API Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/share/nginx/html
+ExecStart=/usr/bin/python3 /usr/share/nginx/html/server/guestbook-api.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

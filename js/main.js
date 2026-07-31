@@ -711,11 +711,33 @@
     var emptyEl = document.getElementById('gbEmpty');
     if (!input || !listEl) return;
 
-    var STORAGE_KEY = 'ross_guestbook_messages';
+    var API_URL = '/api/guestbook';
     var messages = [];
+    var submitting = false;  /* 防连点 */
 
-    /* 加载本地存储的留言 */
-    try { messages = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch (e) { messages = []; }
+    /* 从服务器加载留言 */
+    function loadMessages() {
+      /* 显示加载中 */
+      if (emptyEl) {
+        emptyEl.style.display = '';
+        emptyEl.querySelector('p').textContent = '正在加载留言...';
+      }
+      fetch(API_URL)
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function (data) {
+          messages = data.messages || [];
+          if (emptyEl && !messages.length) emptyEl.querySelector('p').textContent = '还没有留言，快来坐沙发！';
+          renderList();
+        })
+        .catch(function () {
+          messages = [];
+          if (emptyEl) emptyEl.querySelector('p').textContent = '留言加载失败，请刷新重试';
+          renderList();
+        });
+    }
 
     /* 字数统计 */
     input.addEventListener('input', function () {
@@ -774,31 +796,41 @@
 
     /* 提交留言 */
     submitBtn.addEventListener('click', function () {
+      if (submitting) return;
       var text = input.value.trim();
       if (!text) { input.focus(); return; }
       var name = (nameInput.value.trim() || '匿名访客').slice(0, 20);
 
-      var msg = {
-        id: Date.now(),
-        name: name,
-        text: text.slice(0, 500),
-        date: new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-        initial: name.charAt(0).toUpperCase()
-      };
+      submitting = true;
+      submitBtn.disabled = true;
+      submitBtn.textContent = '发送中...';
 
-      messages.unshift(msg);
-      /* 最多保留 100 条 */
-      if (messages.length > 100) messages = messages.slice(0, 100);
-
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch (e) { /* 存储满时静默 */ }
-
-      /* 清空输入 */
-      input.value = '';
-      if (countEl) countEl.textContent = '0';
-      if (nameInput) nameInput.value = '';
-
-      /* 重新渲染列表 */
-      renderList();
+      fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, text: text.slice(0, 500) })
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.ok) {
+            /* 重新加载全部留言，保持服务端最新数据 */
+            loadMessages();
+          } else {
+            alert(data.error || '提交失败，请重试');
+          }
+        })
+        .catch(function () {
+          alert('网络错误，提交失败，请稍后重试');
+        })
+        .finally(function () {
+          submitting = false;
+          submitBtn.disabled = false;
+          submitBtn.textContent = '发送';
+          /* 清空输入 */
+          input.value = '';
+          if (countEl) countEl.textContent = '0';
+          if (nameInput) nameInput.value = '';
+        });
     });
 
     /* 回车提交（Shift+Enter 换行） */
@@ -834,25 +866,14 @@
               '<span class="gb-item-time">' + esc(msg.date) + '</span>' +
             '</div>' +
             '<div class="gb-item-text">' + esc(msg.text).replace(/\n/g, '<br/>') + '</div>' +
-          '</div>' +
-          '<button class="gb-item-del" title="删除此留言" aria-label="删除留言">&times;</button>';
-        /* 直接绑定删除（不用事件委托） */
-        var delBtn = item.querySelector('.gb-item-del');
-        if (delBtn) delBtn.addEventListener('click', (function (i) {
-          return function () {
-            if (!confirm('确定要删除这条留言吗？')) return;
-            messages.splice(i, 1);
-            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch (e) { /* 静默 */ }
-            renderList();
-          };
-        })(idx));
+          '</div>';
         frag.appendChild(item);
       });
       listEl.insertBefore(frag, emptyEl);
     }
 
-    /* 首次渲染 */
-    renderList();
+    /* 首次加载 */
+    loadMessages();
   })();
 
   /* ============================================================
