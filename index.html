@@ -146,6 +146,79 @@
       <div class="ainews-list" id="aiNewsList">
         <div class="ainews-loading">正在加载最新资讯...</div>
       </div>
+
+      <!-- 股票市场总览悬浮窗（跟随新闻条目 hover 显示） -->
+      <aside class="market-float" id="marketFloat" aria-hidden="true">
+        <div class="market-float-glow"></div>
+        <div class="market-float-card">
+          <header class="market-float-header">
+            <div class="market-float-title">
+              <span class="market-float-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 4 4 6-7"/></svg>
+              </span>
+              <span class="market-float-name">市场总览</span>
+              <button class="market-float-refresh" id="marketFloatRefresh" type="button" title="刷新行情" aria-label="刷新行情">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+              </button>
+            </div>
+            <div class="market-float-hot">
+              <span class="market-float-hot-label">热门行业</span>
+              <span class="market-float-hot-name" id="marketFloatHot">广告营销</span>
+              <span class="market-float-hot-pct" id="marketFloatHotPct">+8.37%</span>
+              <svg class="market-float-hot-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </header>
+
+          <div class="market-float-grid">
+            <div class="market-float-cell">
+              <div class="market-float-cell-label">涨跌停家数</div>
+              <div class="market-float-cell-value">
+                <span class="market-up" id="marketFloatZt">108</span>
+                <span class="market-float-cell-sep">:</span>
+                <span class="market-down" id="marketFloatDt">0</span>
+              </div>
+            </div>
+            <div class="market-float-cell">
+              <div class="market-float-cell-label">主力资金净流入</div>
+              <div class="market-float-cell-value market-up" id="marketFlow">+705.44亿</div>
+            </div>
+            <div class="market-float-cell">
+              <div class="market-float-cell-label">美元兑人民币</div>
+              <div class="market-float-cell-value" id="marketFx">6.75</div>
+            </div>
+          </div>
+
+          <div class="market-float-bar">
+            <div class="market-float-bar-up" id="marketBarUp" style="width: 87%"></div>
+            <div class="market-float-bar-flat" id="marketBarFlat" style="width: 2%"></div>
+            <div class="market-float-bar-down" id="marketBarDown" style="width: 11%"></div>
+          </div>
+
+          <footer class="market-float-footer">
+            <div class="market-float-stat">
+              <span class="market-stat-icon market-up">▲</span>
+              <span class="market-stat-label">上涨</span>
+              <span class="market-stat-val market-up" id="marketUpCount">4748</span>
+              <span class="market-stat-unit">家</span>
+            </div>
+            <div class="market-float-stat">
+              <span class="market-stat-icon">−</span>
+              <span class="market-stat-label">平盘</span>
+              <span class="market-stat-val" id="marketFlatCount">101</span>
+              <span class="market-stat-unit">家</span>
+            </div>
+            <div class="market-float-stat">
+              <span class="market-stat-icon market-down">▼</span>
+              <span class="market-stat-label">下跌</span>
+              <span class="market-stat-val market-down" id="marketDownCount">679</span>
+              <span class="market-stat-unit">家</span>
+            </div>
+            <div class="market-float-setting" title="设置">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            </div>
+          </footer>
+        </div>
+      </aside>
     </div>
   </div>
 </section>
@@ -627,6 +700,7 @@
 <script src="js/notes.js"></script>
 <script src="js/dribbble.js"></script>
 <script src="js/ai-news.js"></script>
+<script src="js/market-float.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

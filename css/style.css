@@ -1145,6 +1145,7 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
    AI Design News 版块 — 三区块：快讯 / 今日必读 / 瀑布流
    ============================================================ */
 .section--news { padding-bottom: clamp(var(--space-10), 4vw, var(--space-20)); }
+.section--news .container { position: relative; }
 
 /* 卡片容器 — 固定 24px 内边距 */
 .ainews-card {
@@ -1153,6 +1154,7 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
   border-radius: var(--radius-xl);
   padding: 24px;
   box-shadow: var(--shadow-sm);
+  position: relative;
 }
 
 /* 头部 */
@@ -1418,6 +1420,230 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
   font-size: 12px;
 }
 
+/* ============================================================
+   股票市场总览悬浮窗（hover 任一新闻条目触发）
+   中国风 · 墨与朱砂
+   ============================================================ */
+.market-float {
+  position: absolute;
+  top: 60px;
+  right: 24px;
+  width: 320px;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  transition: opacity .25s ease, transform .3s cubic-bezier(.2,.7,.3,1);
+}
+.market-float.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* 暖色外晕 */
+.market-float-glow {
+  position: absolute;
+  inset: -8px;
+  background: radial-gradient(60% 80% at 50% 30%, rgba(200, 65, 43, 0.06), transparent 70%);
+  filter: blur(16px);
+  z-index: -1;
+  border-radius: 20px;
+  opacity: .8;
+}
+
+/* 主卡 — 米白底色 · 朱砂双层边框 · 四角菱花 */
+.market-float-card {
+  background:
+    /* 四角小菱花 */
+    linear-gradient(135deg, transparent 50%, rgba(200,65,43,0.35) 50%) 4px 4px / 7px 7px no-repeat,
+    linear-gradient(225deg, transparent 50%, rgba(200,65,43,0.35) 50%) calc(100% - 4px) 4px / 7px 7px no-repeat,
+    linear-gradient(45deg, transparent 50%, rgba(200,65,43,0.35) 50%) 4px calc(100% - 4px) / 7px 7px no-repeat,
+    linear-gradient(315deg, transparent 50%, rgba(200,65,43,0.35) 50%) calc(100% - 4px) calc(100% - 4px) / 7px 7px no-repeat,
+    #FAF8F4;
+  border: 2px solid #C8412B;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 0 0 5px #FAF8F4,
+    inset 0 0 0 6px rgba(200, 65, 43, 0.15),
+    0 8px 28px rgba(20, 17, 15, 0.08);
+  padding: 14px 12px 12px;
+  color: #1A1A1A;
+  font-size: 12px;
+  line-height: 1.5;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 头部 */
+.market-float-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(200, 65, 43, 0.1);
+}
+.market-float-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.market-float-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: #C8412B;
+  color: #FAF8F4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
+.market-float-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A1A1A;
+  letter-spacing: 0.04em;
+}
+.market-float-refresh {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: rgba(26, 26, 26, 0.35);
+  cursor: pointer;
+  border-radius: 50%;
+  transition: color .15s, background .15s, transform .4s;
+  padding: 0;
+}
+.market-float-refresh:hover {
+  color: #C8412B;
+  background: rgba(200, 65, 43, 0.08);
+}
+.market-float-refresh.is-spin {
+  transform: rotate(360deg);
+}
+.market-float-hot {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #6B6862;
+}
+.market-float-hot-label { color: #A8A49B; }
+.market-float-hot-name { color: #1A1A1A; font-weight: 600; }
+.market-float-hot-pct { color: #C8412B; font-weight: 700; }
+.market-float-hot-arrow { color: #A8A49B; margin-left: 1px; }
+
+/* 三指标格 */
+.market-float-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.market-float-cell {
+  background: rgba(228, 217, 200, 0.3);
+  border: 1px solid rgba(200, 65, 43, 0.08);
+  border-radius: 8px;
+  padding: 8px 6px;
+  text-align: center;
+}
+.market-float-cell-label {
+  font-size: 10px;
+  color: #A8A49B;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.market-float-cell-value {
+  font-family: var(--font-num, 'AaHouDiHei', 'Inter', monospace);
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A1A1A;
+  letter-spacing: 0.01em;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+}
+.market-float-cell-sep {
+  font-size: 12px;
+  color: #D8D3C8;
+  font-weight: 400;
+  margin: 0 1px;
+}
+.market-up   { color: #C8412B !important; }   /* 朱砂红 · 涨 */
+.market-down { color: #4A7C59 !important; }   /* 古典绿 · 跌 */
+
+/* 进度条 */
+.market-float-bar {
+  display: flex;
+  height: 3px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #E4E0D6;
+  margin-bottom: 10px;
+  gap: 1px;
+}
+.market-float-bar-up   { background: #C8412B; height: 100%; transition: width .6s ease; }
+.market-float-bar-flat { background: #A8A49B; height: 100%; transition: width .6s ease; }
+.market-float-bar-down { background: #4A7C59; height: 100%; transition: width .6s ease; }
+
+/* 底部统计 */
+.market-float-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(200, 65, 43, 0.08);
+}
+.market-float-stat {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: #6B6862;
+}
+.market-stat-icon { font-size: 9px; }
+.market-stat-label { color: #A8A49B; }
+.market-stat-val { font-weight: 700; color: #1A1A1A; font-family: var(--font-num, monospace); }
+.market-stat-unit { color: #A8A49B; font-size: 10px; }
+.market-float-setting {
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(26, 26, 26, 0.3);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color .15s, background .15s;
+}
+.market-float-setting:hover {
+  color: #C8412B;
+  background: rgba(200, 65, 43, 0.08);
+}
+
+/* 数字微抖动效果 */
+@keyframes marketFlash {
+  0% { background: rgba(200, 65, 43, 0.2); }
+  100% { background: transparent; }
+}
+@keyframes marketFlashGreen {
+  0% { background: rgba(74, 124, 89, 0.2); }
+  100% { background: transparent; }
+}
+.market-float-cell-value.is-flash-up   { animation: marketFlash 0.8s ease-out; border-radius: 4px; }
+.market-float-cell-value.is-flash-down { animation: marketFlashGreen 0.8s ease-out; border-radius: 4px; }
+
 /* ===== 响应式 ===== */
 @media (max-width: 560px) {
   .ainews-card { padding: 16px; }
@@ -1425,6 +1651,10 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
   .ainews-mustread-title { font-size: 12px; }
   .ainews-waterfall-title { font-size: 11px; }
   .ainews-waterfall-list { max-height: 220px; }
+  .market-float { display: none; }   /* 移动端隐藏悬浮窗 */
+}
+@media (max-width: 1100px) {
+  .market-float { display: none; }   /* 中等屏幕也隐藏，避免遮挡新闻列表 */
 }
 
 

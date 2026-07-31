@@ -932,6 +932,10 @@
         window.fetchAiNews(true).then(window.renderAiNews);
       });
     }
+    // 股票市场总览悬浮窗
+    if (typeof window.initMarketFloat === 'function') {
+      window.initMarketFloat();
+    }
   })();
 
   /* ============================================================
