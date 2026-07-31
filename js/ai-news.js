@@ -1,27 +1,34 @@
 /**
- * ai-news.js — AI Design News 数据获取与缓存
+ * ai-news.js — AI Design News 数据获取与渲染
  *
  * 信息来源（RSS）：
- *   - TechCrunch AI: https://techcrunch.com/category/artificial-intelligence/feed/
- *   - The Verge AI:  https://www.theverge.com/ai-artificial-intelligence/rss/index.xml
- *   - MIT Tech Review: https://www.technologyreview.com/feed/
- *   - Ars Technica: https://arstechnica.com/tag/ai/feed/
- *   - VentureBeat AI: https://venturebeat.com/category/ai/feed/
- *   - 机器之心: https://www.jiqizhixin.com/rss
- *   - 量子位: https://www.qbitai.com/feed
+ *   - TechCrunch AI
+ *   - The Verge AI
+ *   - MIT Tech Review
+ *   - Ars Technica
+ *   - VentureBeat AI
+ *   - 机器之心
+ *   - 量子位
  *
  * 技术方案：
- *   - 使用 rss2json.com 免费 API（CORS 支持）
+ *   - rss2json.com 免费 API（CORS 支持）
  *   - localStorage 缓存 6 小时
  *   - 失败时回退到内置静态新闻
- *   - 第 1 条 Featured 固定展示，第 2-6 条分 3 组轮播（10s 自动翻页）
+ *   - 每页 6 条（1 Featured + 5 普通），整页翻页，10s 自动切换
  */
 (function () {
   'use strict';
 
   var CACHE_KEY = 'ross_ai_news_cache';
   var CACHE_TTL = 6 * 60 * 60 * 1000; // 6 小时
-  var MAX_NEWS = 6;
+  var MAX_NEWS = 18;                  // 3 页 × 6 条
+  var PER_PAGE = 6;                   // 每页 6 条（1 主 + 5 次）
+  var CAROUSEL_INTERVAL = 10000;      // 10 秒
+  var FLIP_DURATION = 900;            // 翻页动画时长 ms
+
+  var carouselTimer = null;
+  var carouselCurrent = 0;
+  var carouselPageCount = 1;
 
   // RSS 源配置
   var RSS_SOURCES = [
@@ -34,32 +41,20 @@
     { name: '量子位', url: 'https://www.qbitai.com/feed', logo: '量子', type: 'cn', tag: 'AI' }
   ];
 
-  // 兜底静态新闻（每条都有配图）
+  // 兜底静态新闻（无配图，由渲染时自动生成占位图）
   var FALLBACK_NEWS = [
-    { title: 'OpenAI 发布 GPT-5 预览版，多模态能力大幅提升', source: 'TechCrunch', logo: 'TC', url: 'https://techcrunch.com/category/artificial-intelligence/', date: new Date().getTime() - 2 * 3600 * 1000, summary: 'OpenAI 最新模型在图像理解和代码生成方面取得突破性进展。', tag: 'AI', image: 'images/dribbble/29bc8f5b775956cb341fe99e51960aa7.jpg' },
-    { title: 'Adobe Firefly 视频模型更新，支持 4K 输出', source: 'The Verge', logo: 'TV', url: 'https://www.theverge.com/ai-artificial-intelligence', date: new Date().getTime() - 5 * 3600 * 1000, summary: 'Adobe 正式发布 Firefly Video 2.0，支持 4K 分辨率视频生成。', tag: 'Tech', image: 'images/dribbble/e03af33f74250621da7416c3198d2ada.jpg' },
-    { title: 'Figma AI 新增 Design Review 智能审查功能', source: 'MIT Tech', logo: 'MIT', url: 'https://www.technologyreview.com', date: new Date().getTime() - 24 * 3600 * 1000, summary: 'Figma 推出 AI 驱动的设计审查工具，可自动检测可用性问题。', tag: 'Research', image: 'images/dribbble/f87a6b440b25a1d90eba4b75f25bcc70.jpg' },
-    { title: 'Midjourney V7 Alpha 发布，写实风格再进化', source: 'Ars Technica', logo: 'ARS', url: 'https://arstechnica.com/tag/ai/', date: new Date().getTime() - 26 * 3600 * 1000, summary: 'Midjourney 最新版本在人物肖像和场景渲染方面达到新高度。', tag: 'AI', image: 'images/dribbble/dfb00e047857ab8697ea257d081743fb.jpg' },
-    { title: '苹果发布 Liquid Glass Design Kit 设计系统', source: 'VentureBeat', logo: 'VB', url: 'https://venturebeat.com/category/ai/', date: new Date().getTime() - 48 * 3600 * 1000, summary: 'Apple 推出全新玻璃质感设计语言，适配 visionOS 和 iOS 19。', tag: 'Tech', image: 'images/dribbble/435e381b66a7ee3cbdd126929153640e.jpg' },
-    { title: 'Stable Diffusion 3.5 开源，生成质量媲美闭源模型', source: '机器之心', logo: '机器', url: 'https://www.jiqizhixin.com', date: new Date().getTime() - 3 * 3600 * 1000, summary: 'Stability AI 发布 SD 3.5，在文字渲染和构图方面大幅提升。', tag: 'AI', image: 'images/dribbble/c3316b91000ea3f620fe2accdb88d6ee.jpg' },
-    { title: 'Runway Gen-4 视频生成模型亮相，时长突破 40 秒', source: '量子位', logo: '量子', url: 'https://www.qbitai.com', date: new Date().getTime() - 8 * 3600 * 1000, summary: 'Runway 最新模型支持更长视频生成，运动一致性显著改善。', tag: 'AI', image: 'images/dribbble/e95d5bc71efea6c06820ad9a8501701f.jpg' },
-    { title: 'Canva 推出 Magic Studio AI 套件，覆盖全设计流程', source: 'TechCrunch', logo: 'TC', url: 'https://techcrunch.com/category/artificial-intelligence/', date: new Date().getTime() - 12 * 3600 * 1000, summary: 'Canva 整合 AI 功能到设计全流程，从文案到排版一键完成。', tag: 'AI', image: 'images/dribbble/34676030bee2e710f449b6fa8378e3ad.jpg' }
-  ];
-
-  // 默认配图（来自 Dribbble 作品封面，服务器真实存在）
-  var DEFAULT_IMAGES = [
-    'images/dribbble/29bc8f5b775956cb341fe99e51960aa7.jpg',
-    'images/dribbble/e03af33f74250621da7416c3198d2ada.jpg',
-    'images/dribbble/f87a6b440b25a1d90eba4b75f25bcc70.jpg',
-    'images/dribbble/dfb00e047857ab8697ea257d081743fb.jpg',
-    'images/dribbble/435e381b66a7ee3cbdd126929153640e.jpg',
-    'images/dribbble/c3316b91000ea3f620fe2accdb88d6ee.jpg',
-    'images/dribbble/e95d5bc71efea6c06820ad9a8501701f.jpg',
-    'images/dribbble/34676030bee2e710f449b6fa8378e3ad.jpg',
-    'images/dribbble/b553cc7b63a84b9bfd72f50f0a990041.jpg',
-    'images/dribbble/f8c7e9a6d56e74b1ee8155ff41c5197f.jpg',
-    'images/dribbble/56d3541172590ac97f5b65bd79dd6d05.jpg',
-    'images/dribbble/8d9db190d9e1e6db08ec080eab693a2d.jpg'
+    { title: 'OpenAI 发布 GPT-5 预览版，多模态能力大幅提升', source: 'TechCrunch', logo: 'TC', url: 'https://techcrunch.com/category/artificial-intelligence/', date: new Date().getTime() - 2 * 3600 * 1000, summary: 'OpenAI 最新模型在图像理解和代码生成方面取得突破性进展。', tag: 'AI' },
+    { title: 'Adobe Firefly 视频模型更新，支持 4K 输出', source: 'The Verge', logo: 'TV', url: 'https://www.theverge.com/ai-artificial-intelligence', date: new Date().getTime() - 5 * 3600 * 1000, summary: 'Adobe 正式发布 Firefly Video 2.0，支持 4K 分辨率视频生成。', tag: 'Tech' },
+    { title: 'Figma AI 新增 Design Review 智能审查功能', source: 'MIT Tech', logo: 'MIT', url: 'https://www.technologyreview.com', date: new Date().getTime() - 24 * 3600 * 1000, summary: 'Figma 推出 AI 驱动的设计审查工具，可自动检测可用性问题。', tag: 'Research' },
+    { title: 'Midjourney V7 Alpha 发布，写实风格再进化', source: 'Ars Technica', logo: 'ARS', url: 'https://arstechnica.com/tag/ai/', date: new Date().getTime() - 26 * 3600 * 1000, summary: 'Midjourney 最新版本在人物肖像和场景渲染方面达到新高度。', tag: 'AI' },
+    { title: '苹果发布 Liquid Glass Design Kit 设计系统', source: 'VentureBeat', logo: 'VB', url: 'https://venturebeat.com/category/ai/', date: new Date().getTime() - 48 * 3600 * 1000, summary: 'Apple 推出全新玻璃质感设计语言，适配 visionOS 和 iOS 19。', tag: 'Tech' },
+    { title: 'Stable Diffusion 3.5 开源，生成质量媲美闭源模型', source: '机器之心', logo: '机器', url: 'https://www.jiqizhixin.com', date: new Date().getTime() - 3 * 3600 * 1000, summary: 'Stability AI 发布 SD 3.5，在文字渲染和构图方面大幅提升。', tag: 'AI' },
+    { title: 'Runway Gen-4 视频生成模型亮相，时长突破 40 秒', source: '量子位', logo: '量子', url: 'https://www.qbitai.com', date: new Date().getTime() - 8 * 3600 * 1000, summary: 'Runway 最新模型支持更长视频生成，运动一致性显著改善。', tag: 'AI' },
+    { title: 'Canva 推出 Magic Studio AI 套件，覆盖全设计流程', source: 'TechCrunch', logo: 'TC', url: 'https://techcrunch.com/category/artificial-intelligence/', date: new Date().getTime() - 12 * 3600 * 1000, summary: 'Canva 整合 AI 功能到设计全流程，从文案到排版一键完成。', tag: 'AI' },
+    { title: 'Google DeepMind 推出新架构，推理效率提升 3 倍', source: 'MIT Tech', logo: 'MIT', url: 'https://www.technologyreview.com', date: new Date().getTime() - 18 * 3600 * 1000, summary: 'DeepMind 新架构在保持准确率的同时大幅降低推理成本。', tag: 'Research' },
+    { title: 'Anthropic Claude 4 发布，支持 200K 上下文窗口', source: 'The Verge', logo: 'TV', url: 'https://www.theverge.com/ai-artificial-intelligence', date: new Date().getTime() - 20 * 3600 * 1000, summary: 'Claude 4 在代码理解和长文档分析方面表现卓越。', tag: 'Tech' },
+    { title: 'Meta AI 发布视频生成工具，支持实时编辑', source: 'Ars Technica', logo: 'ARS', url: 'https://arstechnica.com/tag/ai/', date: new Date().getTime() - 28 * 3600 * 1000, summary: 'Meta 新工具允许用户在视频生成过程中实时调整风格和场景。', tag: 'AI' },
+    { title: 'Notion AI 升级，支持多页面智能关联分析', source: 'VentureBeat', logo: 'VB', url: 'https://venturebeat.com/category/ai/', date: new Date().getTime() - 36 * 3600 * 1000, summary: 'Notion 新功能可以跨页面分析内容，自动生成知识图谱。', tag: 'AI' }
   ];
 
   // 工具函数
@@ -73,24 +68,44 @@
 
   function timeAgo(ts) {
     var diff = Math.floor((now() - ts) / 1000);
-    if (diff < 60) return '刚刚';
-    if (diff < 3600) return Math.floor(diff / 60) + '分钟前';
-    if (diff < 86400) return Math.floor(diff / 3600) + '小时前';
-    if (diff < 172800) return '昨天';
-    return Math.floor(diff / 86400) + '天前';
+    if (diff < 60) return '\u521a\u521a';
+    if (diff < 3600) return Math.floor(diff / 60) + '\u5206\u949f\u524d';
+    if (diff < 86400) return Math.floor(diff / 3600) + '\u5c0f\u65f6\u524d';
+    if (diff < 172800) return '\u6628\u5929';
+    return Math.floor(diff / 86400) + '\u5929\u524d';
   }
 
   function isNew(ts) {
     return (now() - ts) < 24 * 3600 * 1000;
   }
 
-  function getDefaultImage(index) {
-    return DEFAULT_IMAGES[index % DEFAULT_IMAGES.length];
+  // 根据字符串生成一致的 HSL 颜色
+  function hashColor(str) {
+    var hash = 0;
+    for (var i = 0; i < (str || '').length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    var h = Math.abs(hash) % 360;
+    return 'hsl(' + h + ', 72%, 58%)';
+  }
+
+  // 自动生成 SVG 占位图（data URI）
+  function generatePlaceholder(source, title) {
+    var text = (source || title || '?').charAt(0).toUpperCase();
+    var color = hashColor(source || title);
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="130"><rect width="100%" height="100%" fill="' + color + '" rx="8"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="64" fill="#fff" font-family="system-ui,-apple-system,sans-serif" font-weight="700">' + text + '</text></svg>';
+    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  }
+
+  // 获取图片：优先真实配图，无则自动生成占位图
+  function getImage(item) {
+    if (item.image && item.image.trim()) return item.image;
+    return generatePlaceholder(item.source, item.title);
   }
 
   // 从 rss2json API 获取单个 RSS 源
   function fetchRss(source) {
-    var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(source.url) + '&count=3';
+    var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(source.url) + '&count=4';
     return new Promise(function (resolve) {
       var xhr = new XMLHttpRequest();
       xhr.open('GET', apiUrl, true);
@@ -101,10 +116,13 @@
           try {
             var data = JSON.parse(xhr.responseText);
             if (data.status === 'ok' && data.items) {
-              var items = data.items.slice(0, 3).map(function (item) {
+              var items = data.items.slice(0, 4).map(function (item) {
                 var img = '';
+                // 1. thumbnail
                 if (item.thumbnail) img = item.thumbnail;
+                // 2. enclosure
                 else if (item.enclosure && item.enclosure.link) img = item.enclosure.link;
+                // 3. description 中第一张图
                 else {
                   var m = item.description && item.description.match(/<img[^>]+src=["']([^"']+)["']/i);
                   if (m) img = m[1];
@@ -155,17 +173,16 @@
         allNews.sort(function (a, b) { return b.date - a.date; });
         allNews = allNews.slice(0, MAX_NEWS);
 
-        if (allNews.length < 5) {
-          var needed = MAX_NEWS - allNews.length;
-          var fallback = FALLBACK_NEWS.slice(0, needed);
+        // 补充到至少 PER_PAGE 条
+        if (allNews.length < PER_PAGE) {
           var existingTitles = {};
           allNews.forEach(function (n) { existingTitles[n.title] = true; });
-          fallback.forEach(function (n) {
-            if (!existingTitles[n.title]) {
-              allNews.push(n);
-              existingTitles[n.title] = true;
+          for (var i = 0; i < FALLBACK_NEWS.length && allNews.length < MAX_NEWS; i++) {
+            if (!existingTitles[FALLBACK_NEWS[i].title]) {
+              allNews.push(FALLBACK_NEWS[i]);
+              existingTitles[FALLBACK_NEWS[i].title] = true;
             }
-          });
+          }
           allNews.sort(function (a, b) { return b.date - a.date; });
           allNews = allNews.slice(0, MAX_NEWS);
         }
@@ -180,12 +197,12 @@
   };
 
   // 渲染单条普通条目 HTML
-  function renderItemHTML(item, index) {
+  function renderItemHTML(item) {
     var newBadge = isNew(item.date) ? '<span class="ainews-new">NEW</span>' : '';
     var tagDotClass = isNew(item.date) ? 'ainews-tag-dot ainews-tag-dot--new' : 'ainews-tag-dot';
     var timeStr = timeAgo(item.date);
-    var metaLine = '<span class="ainews-meta-source">' + esc(item.source) + '</span><span class="ainews-meta-sep">·</span><span class="ainews-meta-time">' + timeStr + '</span>';
-    var imgSrc = item.image || getDefaultImage(index);
+    var metaLine = '<span class="ainews-meta-source">' + esc(item.source) + '</span><span class="ainews-meta-sep">\u00b7</span><span class="ainews-meta-time">' + timeStr + '</span>';
+    var imgSrc = getImage(item);
 
     return '<a class="ainews-item" href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer">' +
       '<div class="ainews-item-main">' +
@@ -197,76 +214,25 @@
         '<div class="ainews-item-meta">' + metaLine + '</div>' +
       '</div>' +
       '<div class="ainews-item-thumb">' +
-        '<img class="ainews-item-thumb-img" src="' + esc(imgSrc) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'" />' +
+        '<img class="ainews-item-thumb-img" src="' + esc(imgSrc) + '" alt="" loading="lazy" />' +
       '</div>' +
     '</a>';
   }
 
-  // 轮播状态
-  var carouselTimer = null;
-  var carouselCurrent = 0;
-  var carouselIsFlipping = false;
-  var CAROUSEL_INTERVAL = 10000; // 10 秒
-  var FLIP_DURATION = 600;       // 翻页动画时长 ms
+  // 渲染单页 HTML（1 Featured + 5 普通）
+  function renderPageHTML(pageNews, pageIdx) {
+    if (!pageNews || !pageNews.length) return '';
 
-  // 翻页到指定组
-  function flipTo(pageEl, dots, targetIdx) {
-    if (carouselIsFlipping || targetIdx === carouselCurrent) return;
-    carouselIsFlipping = true;
-
-    var groups = pageEl.querySelectorAll('.ainews-carousel-group');
-
-    // Middle: swap content if needed
-    var oldGroup = groups[carouselCurrent];
-    var newGroup = groups[targetIdx];
-
-    oldGroup.classList.add('flip-out');
-    newGroup.classList.add('flip-in');
-
-    // Update dots highlight
-    dots.forEach(function (d, i) {
-      d.classList.toggle('active', i === targetIdx);
-    });
-
-    setTimeout(function () {
-      oldGroup.classList.remove('flip-out', 'active');
-      newGroup.classList.remove('flip-in');
-      newGroup.classList.add('active');
-      carouselCurrent = targetIdx;
-      carouselIsFlipping = false;
-    }, FLIP_DURATION);
-  }
-
-  // 渲染新闻列表到 DOM
-  window.renderAiNews = function (news) {
-    var container = document.getElementById('aiNewsList');
-    var countEl = document.getElementById('aiNewsCount');
-    if (!container) return;
-
-    if (!news || !news.length) {
-      container.innerHTML = '<div class="ainews-empty">暂无最新资讯</div>';
-      if (countEl) countEl.textContent = '';
-      return;
-    }
-
-    if (countEl) countEl.textContent = news.length;
-
-    // 确保每条都有配图
-    news.forEach(function (item, i) {
-      if (!item.image) item.image = getDefaultImage(i);
-    });
-
-    // --- Featured 第一条 ---
-    var featured = news[0];
+    var featured = pageNews[0];
     var fNewBadge = isNew(featured.date) ? '<span class="ainews-new">NEW</span>' : '';
     var fTagDotClass = isNew(featured.date) ? 'ainews-tag-dot ainews-tag-dot--new' : 'ainews-tag-dot';
     var fTimeStr = timeAgo(featured.date);
-    var fMetaLine = '<span class="ainews-meta-source">' + esc(featured.source) + '</span><span class="ainews-meta-sep">·</span><span class="ainews-meta-time">' + fTimeStr + '</span>';
-    var fImgSrc = featured.image || getDefaultImage(0);
+    var fMetaLine = '<span class="ainews-meta-source">' + esc(featured.source) + '</span><span class="ainews-meta-sep">\u00b7</span><span class="ainews-meta-time">' + fTimeStr + '</span>';
+    var fImgSrc = getImage(featured);
 
     var html = '<a class="ainews-featured" href="' + esc(featured.url) + '" target="_blank" rel="noopener noreferrer">' +
       '<div class="ainews-featured-img-wrap">' +
-        '<img class="ainews-featured-img" src="' + esc(fImgSrc) + '" alt="" loading="eager" onerror="this.style.display=\'none\'" />' +
+        '<img class="ainews-featured-img" src="' + esc(fImgSrc) + '" alt="" loading="eager" />' +
       '</div>' +
       '<div class="ainews-featured-body">' +
         '<div class="ainews-featured-tag">' +
@@ -279,59 +245,99 @@
       '</div>' +
     '</a>';
 
-    // --- 轮播区域：第 2-6 条分 3 组 ---
-    var carouselItems = news.slice(1); // 5 items
-    // 3 组，每组 2 条（最后一组 wrap-around 到第一条）
-    var groups = [
-      [carouselItems[0], carouselItems[1]],
-      [carouselItems[2], carouselItems[3]],
-      [carouselItems[4], carouselItems[0]] // wrap
-    ];
+    // 第 2-6 条普通条目
+    for (var i = 1; i < pageNews.length; i++) {
+      html += renderItemHTML(pageNews[i]);
+    }
 
-    html += '<div class="ainews-carousel">';
+    return html;
+  }
+
+  // 翻页到指定页
+  function flipTo(pageEls, dots, pageCounter, targetIdx) {
+    if (targetIdx === carouselCurrent) return;
+
+    var oldEl = pageEls[carouselCurrent];
+    var newEl = pageEls[targetIdx];
+    if (!oldEl || !newEl) return;
+
+    oldEl.classList.remove('active');
+    newEl.classList.add('active');
+
+    // Update dots
+    dots.forEach(function (d, i) {
+      d.classList.toggle('active', i === targetIdx);
+    });
+
+    carouselCurrent = targetIdx;
+
+    if (pageCounter) {
+      pageCounter.textContent = (carouselCurrent + 1) + ' / ' + carouselPageCount;
+    }
+  }
+
+  // 渲染新闻到 DOM
+  window.renderAiNews = function (news) {
+    var container = document.getElementById('aiNewsList');
+    var countEl = document.getElementById('aiNewsCount');
+    if (!container) return;
+
+    if (!news || !news.length) {
+      container.innerHTML = '<div class="ainews-empty">\u6682\u65e0\u6700\u65b0\u8d44\u8baf</div>';
+      if (countEl) countEl.textContent = '';
+      return;
+    }
+
+    if (countEl) countEl.textContent = news.length;
+
+    // 分页：每页 PER_PAGE 条
+    var pages = [];
+    for (var i = 0; i < news.length; i += PER_PAGE) {
+      pages.push(news.slice(i, i + PER_PAGE));
+    }
+    carouselPageCount = pages.length;
+
+    var html = '<div class="ainews-carousel">';
     html += '<div class="ainews-carousel-stage" id="aiNewsCarousel">';
 
-    groups.forEach(function (group, gi) {
-      var activeClass = gi === 0 ? ' active' : '';
-      html += '<div class="ainews-carousel-group' + activeClass + '" data-group="' + gi + '">';
-      group.forEach(function (item, ii) {
-        // 全局索引：第1条Featured不算，每组2条
-        var globalIdx = 1 + gi * 2 + ii;
-        html += renderItemHTML(item, globalIdx);
-      });
+    pages.forEach(function (page, pi) {
+      var activeClass = pi === 0 ? ' active' : '';
+      html += '<div class="ainews-carousel-page' + activeClass + '" data-page="' + pi + '">';
+      html += renderPageHTML(page, pi);
       html += '</div>';
     });
 
-    html += '</div>';
+    html += '</div>'; // .ainews-carousel-stage
 
-    // 指示器圆点
-    html += '<div class="ainews-carousel-dots" id="aiNewsDots">';
-    for (var d = 0; d < 3; d++) {
-      html += '<button class="ainews-dot' + (d === 0 ? ' active' : '') + '" data-idx="' + d + '" type="button" aria-label="第' + (d + 1) + '组"></button>';
+    // 指示器
+    if (carouselPageCount > 1) {
+      html += '<div class="ainews-carousel-dots" id="aiNewsDots">';
+      for (var d = 0; d < carouselPageCount; d++) {
+        html += '<button class="ainews-dot' + (d === 0 ? ' active' : '') + '" data-idx="' + d + '" type="button" aria-label="\u7b2c' + (d + 1) + '\u9875"></button>';
+      }
+      html += '</div>';
+      html += '<span class="ainews-carousel-page-num" id="aiNewsPage">1 / ' + carouselPageCount + '</span>';
     }
-    html += '</div>';
-
-    // 页码
-    html += '<span class="ainews-carousel-page" id="aiNewsPage">1 / 3</span>';
 
     html += '</div>'; // .ainews-carousel
 
     container.innerHTML = html;
 
-    // --- 初始化轮播 ---
-    var pageEl = document.getElementById('aiNewsCarousel');
-    var dots = document.querySelectorAll('#aiNewsDots .ainews-dot');
+    // 多页时才启动轮播
+    if (carouselPageCount <= 1) return;
+
+    var pageEls = container.querySelectorAll('.ainews-carousel-page');
+    var dots = container.querySelectorAll('#aiNewsDots .ainews-dot');
     var pageCounter = document.getElementById('aiNewsPage');
     carouselCurrent = 0;
-    carouselIsFlipping = false;
 
     // 清除旧定时器
     if (carouselTimer) clearInterval(carouselTimer);
 
     // 自动轮播
     carouselTimer = setInterval(function () {
-      var next = (carouselCurrent + 1) % 3;
-      flipTo(pageEl, dots, next);
+      var next = (carouselCurrent + 1) % carouselPageCount;
+      flipTo(pageEls, dots, pageCounter, next);
     }, CAROUSEL_INTERVAL);
 
     // 点击小圆点切换
@@ -339,40 +345,22 @@
       dot.addEventListener('click', function () {
         var idx = parseInt(dot.getAttribute('data-idx'));
         if (idx !== carouselCurrent) {
-          // 重置定时器
           if (carouselTimer) clearInterval(carouselTimer);
-          flipTo(pageEl, dots, idx);
+          flipTo(pageEls, dots, pageCounter, idx);
           carouselTimer = setInterval(function () {
-            var n = (carouselCurrent + 1) % 3;
-            flipTo(pageEl, dots, n);
+            var n = (carouselCurrent + 1) % carouselPageCount;
+            flipTo(pageEls, dots, pageCounter, n);
           }, CAROUSEL_INTERVAL);
         }
       });
     });
-
-    // 更新页码显示
-    var pageObserver = new MutationObserver(function () {
-      if (pageCounter) pageCounter.textContent = (carouselCurrent + 1) + ' / 3';
-    });
-    var activeGroup = pageEl.querySelector('.ainews-carousel-group.active');
-    if (activeGroup) {
-      pageObserver.observe(activeGroup, { attributes: true, attributeFilter: ['class'] });
-    }
-    if (pageCounter) pageCounter.textContent = '1 / 3';
-
-    // 定时更新页码
-    var pageUpdater = setInterval(function () {
-      if (pageCounter && !carouselIsFlipping) {
-        pageCounter.textContent = (carouselCurrent + 1) + ' / 3';
-      }
-    }, 200);
   };
 
   // 初始化
   window.initAiNews = function () {
     var container = document.getElementById('aiNewsList');
     if (!container) return;
-    container.innerHTML = '<div class="ainews-loading">正在加载最新资讯...</div>';
+    container.innerHTML = '<div class="ainews-loading">\u6b63\u5728\u52a0\u8f7d\u6700\u65b0\u8d44\u8baf...</div>';
     window.fetchAiNews().then(window.renderAiNews);
   };
 })();
