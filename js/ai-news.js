@@ -1,34 +1,21 @@
 /**
- * ai-news.js — AI Design News 数据获取与渲染
+ * ai-news.js — AI Design News 三区块布局
  *
  * 信息来源（RSS）：
- *   - TechCrunch AI
- *   - The Verge AI
- *   - MIT Tech Review
- *   - Ars Technica
- *   - VentureBeat AI
- *   - 机器之心
- *   - 量子位
+ *   - TechCrunch AI / The Verge AI / MIT Tech Review / Ars Technica
+ *   - VentureBeat AI / 机器之心 / 量子位
  *
- * 技术方案：
- *   - rss2json.com 免费 API（CORS 支持）
- *   - localStorage 缓存 6 小时
- *   - 失败时回退到内置静态新闻
- *   - 每页 6 条（1 Featured + 5 普通），整页翻页，10s 自动切换
+ * 布局（单卡片内三区块）：
+ *   ├─ 快讯（1条最新，一行紧凑）
+ *   ├─ 今日必读（3条精选，编号+来源图标）
+ *   └─ 瀑布流资讯（其余全部，可滚动列表）
  */
 (function () {
   'use strict';
 
   var CACHE_KEY = 'ross_ai_news_cache';
   var CACHE_TTL = 6 * 60 * 60 * 1000; // 6 小时
-  var MAX_NEWS = 18;                  // 3 页 × 6 条
-  var PER_PAGE = 6;                   // 每页 6 条（1 主 + 5 次）
-  var CAROUSEL_INTERVAL = 10000;      // 10 秒
-  var FLIP_DURATION = 900;            // 翻页动画时长 ms
-
-  var carouselTimer = null;
-  var carouselCurrent = 0;
-  var carouselPageCount = 1;
+  var MAX_NEWS = 18;
 
   // RSS 源配置
   var RSS_SOURCES = [
@@ -41,7 +28,7 @@
     { name: '量子位', url: 'https://www.qbitai.com/feed', logo: '量子', type: 'cn', tag: 'AI' }
   ];
 
-  // 兜底静态新闻（无配图，由渲染时自动生成占位图）
+  // 兜底静态新闻
   var FALLBACK_NEWS = [
     { title: 'OpenAI 发布 GPT-5 预览版，多模态能力大幅提升', source: 'TechCrunch', logo: 'TC', url: 'https://techcrunch.com/category/artificial-intelligence/', date: new Date().getTime() - 2 * 3600 * 1000, summary: 'OpenAI 最新模型在图像理解和代码生成方面取得突破性进展。', tag: 'AI' },
     { title: 'Adobe Firefly 视频模型更新，支持 4K 输出', source: 'The Verge', logo: 'TV', url: 'https://www.theverge.com/ai-artificial-intelligence', date: new Date().getTime() - 5 * 3600 * 1000, summary: 'Adobe 正式发布 Firefly Video 2.0，支持 4K 分辨率视频生成。', tag: 'Tech' },
@@ -89,18 +76,12 @@
     return 'hsl(' + h + ', 72%, 58%)';
   }
 
-  // 自动生成 SVG 占位图（data URI）
-  function generatePlaceholder(source, title) {
-    var text = (source || title || '?').charAt(0).toUpperCase();
-    var color = hashColor(source || title);
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="130"><rect width="100%" height="100%" fill="' + color + '" rx="8"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="64" fill="#fff" font-family="system-ui,-apple-system,sans-serif" font-weight="700">' + text + '</text></svg>';
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
-  }
-
-  // 获取图片：优先真实配图，无则自动生成占位图
-  function getImage(item) {
-    if (item.image && item.image.trim()) return item.image;
-    return generatePlaceholder(item.source, item.title);
+  // 获取来源首字母/首字
+  function getSourceInitial(source) {
+    if (!source) return '?';
+    var first = source.charAt(0);
+    if (/[\u4e00-\u9fa5]/.test(first)) return first;
+    return first.toUpperCase();
   }
 
   // 从 rss2json API 获取单个 RSS 源
@@ -118,11 +99,8 @@
             if (data.status === 'ok' && data.items) {
               var items = data.items.slice(0, 4).map(function (item) {
                 var img = '';
-                // 1. thumbnail
                 if (item.thumbnail) img = item.thumbnail;
-                // 2. enclosure
                 else if (item.enclosure && item.enclosure.link) img = item.enclosure.link;
-                // 3. description 中第一张图
                 else {
                   var m = item.description && item.description.match(/<img[^>]+src=["']([^"']+)["']/i);
                   if (m) img = m[1];
@@ -153,18 +131,20 @@
   }
 
   // 获取所有新闻（带缓存）
-  window.fetchAiNews = function () {
+  window.fetchAiNews = function (forceRefresh) {
     return new Promise(function (resolve) {
-      try {
-        var cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-          var data = JSON.parse(cached);
-          if (data.ts && (now() - data.ts) < CACHE_TTL) {
-            resolve(data.news);
-            return;
+      if (!forceRefresh) {
+        try {
+          var cached = localStorage.getItem(CACHE_KEY);
+          if (cached) {
+            var data = JSON.parse(cached);
+            if (data.ts && (now() - data.ts) < CACHE_TTL) {
+              resolve(data.news);
+              return;
+            }
           }
-        }
-      } catch (e) {}
+        } catch (e) {}
+      }
 
       var promises = RSS_SOURCES.map(fetchRss);
       Promise.all(promises).then(function (results) {
@@ -173,8 +153,7 @@
         allNews.sort(function (a, b) { return b.date - a.date; });
         allNews = allNews.slice(0, MAX_NEWS);
 
-        // 补充到至少 PER_PAGE 条
-        if (allNews.length < PER_PAGE) {
+        if (allNews.length < 6) {
           var existingTitles = {};
           allNews.forEach(function (n) { existingTitles[n.title] = true; });
           for (var i = 0; i < FALLBACK_NEWS.length && allNews.length < MAX_NEWS; i++) {
@@ -196,87 +175,45 @@
     });
   };
 
-  // 渲染单条普通条目 HTML
-  function renderItemHTML(item) {
-    var newBadge = isNew(item.date) ? '<span class="ainews-new">NEW</span>' : '';
-    var tagDotClass = isNew(item.date) ? 'ainews-tag-dot ainews-tag-dot--new' : 'ainews-tag-dot';
+  // ========== 渲染区块 ==========
+
+  // 快讯（1条）
+  function renderFlashHTML(item) {
     var timeStr = timeAgo(item.date);
-    var metaLine = '<span class="ainews-meta-source">' + esc(item.source) + '</span><span class="ainews-meta-sep">\u00b7</span><span class="ainews-meta-time">' + timeStr + '</span>';
-    var imgSrc = getImage(item);
+    var newBadge = isNew(item.date) ? '<span class="ainews-new">NEW</span>' : '';
+    return '<a class="ainews-flash" href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer">' +
+      '<span class="ainews-flash-label">\u5feb\u8baf</span>' +
+      '<span class="ainews-flash-time">' + timeStr + '</span>' +
+      '<span class="ainews-flash-title">' + esc(item.title) + newBadge + '</span>' +
+    '</a>';
+  }
 
-    return '<a class="ainews-item" href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer">' +
-      '<div class="ainews-item-main">' +
-        '<div class="ainews-item-tagline">' +
-          '<span class="' + tagDotClass + '"></span>' +
-          '<span class="ainews-item-tag">' + esc(item.tag || 'AI') + '</span>' +
+  // 今日必读单条
+  function renderMustReadHTML(item, index) {
+    var num = (index + 1) < 10 ? '0' + (index + 1) : String(index + 1);
+    return '<a class="ainews-mustread-item" href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer">' +
+      '<span class="ainews-mustread-num">' + num + '</span>' +
+      '<span class="ainews-mustread-title">' + esc(item.title) + '</span>' +
+    '</a>';
+  }
+
+  // 瀑布流单条
+  function renderWaterfallHTML(item) {
+    var timeStr = timeAgo(item.date);
+    var newBadge = isNew(item.date) ? '<span class="ainews-new">NEW</span>' : '';
+    return '<a class="ainews-waterfall-item" href="' + esc(item.url) + '" target="_blank" rel="noopener noreferrer">' +
+      '<div class="ainews-waterfall-main">' +
+        '<h4 class="ainews-waterfall-title">' + esc(item.title) + newBadge + '</h4>' +
+        '<div class="ainews-waterfall-meta">' +
+          '<span class="ainews-meta-source">' + esc(item.source) + '</span>' +
+          '<span class="ainews-meta-sep">\u00b7</span>' +
+          '<span class="ainews-meta-time">' + timeStr + '</span>' +
         '</div>' +
-        '<h4 class="ainews-item-title">' + esc(item.title) + newBadge + '</h4>' +
-        '<div class="ainews-item-meta">' + metaLine + '</div>' +
-      '</div>' +
-      '<div class="ainews-item-thumb">' +
-        '<img class="ainews-item-thumb-img" src="' + esc(imgSrc) + '" alt="" loading="lazy" />' +
       '</div>' +
     '</a>';
   }
 
-  // 渲染单页 HTML（1 Featured + 5 普通）
-  function renderPageHTML(pageNews, pageIdx) {
-    if (!pageNews || !pageNews.length) return '';
-
-    var featured = pageNews[0];
-    var fNewBadge = isNew(featured.date) ? '<span class="ainews-new">NEW</span>' : '';
-    var fTagDotClass = isNew(featured.date) ? 'ainews-tag-dot ainews-tag-dot--new' : 'ainews-tag-dot';
-    var fTimeStr = timeAgo(featured.date);
-    var fMetaLine = '<span class="ainews-meta-source">' + esc(featured.source) + '</span><span class="ainews-meta-sep">\u00b7</span><span class="ainews-meta-time">' + fTimeStr + '</span>';
-    var fImgSrc = getImage(featured);
-
-    var html = '<a class="ainews-featured" href="' + esc(featured.url) + '" target="_blank" rel="noopener noreferrer">' +
-      '<div class="ainews-featured-img-wrap">' +
-        '<img class="ainews-featured-img" src="' + esc(fImgSrc) + '" alt="" loading="eager" />' +
-      '</div>' +
-      '<div class="ainews-featured-body">' +
-        '<div class="ainews-featured-tag">' +
-          '<span class="' + fTagDotClass + '"></span>' +
-          '<span>' + esc(featured.tag || 'AI') + '</span>' +
-        '</div>' +
-        '<h4 class="ainews-featured-title">' + esc(featured.title) + fNewBadge + '</h4>' +
-        '<p class="ainews-featured-summary">' + esc(featured.summary || '') + '</p>' +
-        '<div class="ainews-featured-meta">' + fMetaLine + '</div>' +
-      '</div>' +
-    '</a>';
-
-    // 第 2-6 条普通条目
-    for (var i = 1; i < pageNews.length; i++) {
-      html += renderItemHTML(pageNews[i]);
-    }
-
-    return html;
-  }
-
-  // 翻页到指定页
-  function flipTo(pageEls, dots, pageCounter, targetIdx) {
-    if (targetIdx === carouselCurrent) return;
-
-    var oldEl = pageEls[carouselCurrent];
-    var newEl = pageEls[targetIdx];
-    if (!oldEl || !newEl) return;
-
-    oldEl.classList.remove('active');
-    newEl.classList.add('active');
-
-    // Update dots
-    dots.forEach(function (d, i) {
-      d.classList.toggle('active', i === targetIdx);
-    });
-
-    carouselCurrent = targetIdx;
-
-    if (pageCounter) {
-      pageCounter.textContent = (carouselCurrent + 1) + ' / ' + carouselPageCount;
-    }
-  }
-
-  // 渲染新闻到 DOM
+  // 主渲染函数
   window.renderAiNews = function (news) {
     var container = document.getElementById('aiNewsList');
     var countEl = document.getElementById('aiNewsCount');
@@ -290,70 +227,49 @@
 
     if (countEl) countEl.textContent = news.length;
 
-    // 分页：每页 PER_PAGE 条
-    var pages = [];
-    for (var i = 0; i < news.length; i += PER_PAGE) {
-      pages.push(news.slice(i, i + PER_PAGE));
-    }
-    carouselPageCount = pages.length;
+    // 数据分三块
+    var flash = news[0];
+    var mustRead = news.slice(1, 4);
+    var waterfall = news.slice(4);
 
-    var html = '<div class="ainews-carousel">';
-    html += '<div class="ainews-carousel-stage" id="aiNewsCarousel">';
+    var html = '';
 
-    pages.forEach(function (page, pi) {
-      var activeClass = pi === 0 ? ' active' : '';
-      html += '<div class="ainews-carousel-page' + activeClass + '" data-page="' + pi + '">';
-      html += renderPageHTML(page, pi);
+    // === 快讯 ===
+    html += '<div class="ainews-section ainews-section--flash">';
+    html += renderFlashHTML(flash);
+    html += '</div>';
+
+    // === 今日必读 ===
+    if (mustRead.length) {
+      html += '<div class="ainews-divider"></div>';
+      html += '<div class="ainews-section ainews-section--mustread">';
+      html += '<div class="ainews-section-header">';
+      html += '<span class="ainews-section-title">\u4eca\u65e5\u5fc5\u8bfb</span>';
       html += '</div>';
-    });
-
-    html += '</div>'; // .ainews-carousel-stage
-
-    // 指示器
-    if (carouselPageCount > 1) {
-      html += '<div class="ainews-carousel-dots" id="aiNewsDots">';
-      for (var d = 0; d < carouselPageCount; d++) {
-        html += '<button class="ainews-dot' + (d === 0 ? ' active' : '') + '" data-idx="' + d + '" type="button" aria-label="\u7b2c' + (d + 1) + '\u9875"></button>';
-      }
+      html += '<div class="ainews-mustread-list">';
+      mustRead.forEach(function (item, i) {
+        html += renderMustReadHTML(item, i);
+      });
       html += '</div>';
-      html += '<span class="ainews-carousel-page-num" id="aiNewsPage">1 / ' + carouselPageCount + '</span>';
+      html += '</div>';
     }
 
-    html += '</div>'; // .ainews-carousel
+    // === 瀑布流资讯 ===
+    if (waterfall.length) {
+      html += '<div class="ainews-divider"></div>';
+      html += '<div class="ainews-section ainews-section--waterfall">';
+      html += '<div class="ainews-section-header">';
+      html += '<span class="ainews-section-title">\u7011\u5e03\u6d41\u8d44\u8baf</span>';
+      html += '</div>';
+      html += '<div class="ainews-waterfall-list">';
+      waterfall.forEach(function (item) {
+        html += renderWaterfallHTML(item);
+      });
+      html += '</div>';
+      html += '</div>';
+    }
 
     container.innerHTML = html;
-
-    // 多页时才启动轮播
-    if (carouselPageCount <= 1) return;
-
-    var pageEls = container.querySelectorAll('.ainews-carousel-page');
-    var dots = container.querySelectorAll('#aiNewsDots .ainews-dot');
-    var pageCounter = document.getElementById('aiNewsPage');
-    carouselCurrent = 0;
-
-    // 清除旧定时器
-    if (carouselTimer) clearInterval(carouselTimer);
-
-    // 自动轮播
-    carouselTimer = setInterval(function () {
-      var next = (carouselCurrent + 1) % carouselPageCount;
-      flipTo(pageEls, dots, pageCounter, next);
-    }, CAROUSEL_INTERVAL);
-
-    // 点击小圆点切换
-    dots.forEach(function (dot) {
-      dot.addEventListener('click', function () {
-        var idx = parseInt(dot.getAttribute('data-idx'));
-        if (idx !== carouselCurrent) {
-          if (carouselTimer) clearInterval(carouselTimer);
-          flipTo(pageEls, dots, pageCounter, idx);
-          carouselTimer = setInterval(function () {
-            var n = (carouselCurrent + 1) % carouselPageCount;
-            flipTo(pageEls, dots, pageCounter, n);
-          }, CAROUSEL_INTERVAL);
-        }
-      });
-    });
   };
 
   // 初始化

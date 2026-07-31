@@ -1142,7 +1142,7 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
 }
 
 /* ============================================================
-   AI Design News 版块 — 紧凑布局，每条配缩略图
+   AI Design News 版块 — 三区块：快讯 / 今日必读 / 瀑布流
    ============================================================ */
 .section--news { padding-bottom: clamp(var(--space-10), 4vw, var(--space-20)); }
 
@@ -1160,7 +1160,7 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 .ainews-title-wrap {
   display: flex;
@@ -1212,236 +1212,177 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
   flex-direction: column;
 }
 
-/* ===== 轮播容器（柔和翻页） ===== */
-.ainews-carousel {
-  position: relative;
-  min-height: 520px; /* 1 Featured + 5 items 整页高度 */
-}
-.ainews-carousel-stage {
-  position: relative;
-  width: 100%;
-}
-.ainews-carousel-page {
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  opacity: 0;
-  transform: translateY(14px) scale(0.985);
-  pointer-events: none;
-  transition: opacity 0.85s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              transform 0.85s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              filter 0.85s ease;
-  filter: blur(1px);
-  will-change: opacity, transform, filter;
-}
-.ainews-carousel-page.active {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-  filter: blur(0);
-  position: relative;
+/* 分隔线 */
+.ainews-divider {
+  height: 1px;
+  background: var(--color-divider);
+  margin: 10px 0;
 }
 
-/* 指示器 */
-.ainews-carousel-dots {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 14px;
-}
-.ainews-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  border: none;
-  background: var(--color-border);
-  cursor: pointer;
-  padding: 0;
-  transition: all .35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-.ainews-dot.active {
-  background: var(--color-primary);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 15%, transparent);
-  transform: scale(1.35);
-}
-.ainews-dot:hover {
-  background: var(--color-text-muted);
-  transform: scale(1.15);
-}
-
-/* 页码 */
-.ainews-carousel-page-num {
-  display: block;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--color-text-faint);
-  margin-top: 6px;
-}
-
-/* ===== Featured 第一条：左图右文 ===== */
-.ainews-featured {
-  display: flex;
-  gap: 16px;
-  padding: 12px 0 16px;
-  text-decoration: none;
-  color: var(--color-text);
-  border-bottom: 1px solid var(--color-divider);
-  transition: opacity .2s ease;
-}
-.ainews-featured:hover {
-  opacity: .85;
-}
-.ainews-featured-img-wrap {
-  flex: 0 0 200px;
-  height: 130px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: var(--color-surface-2);
-}
-.ainews-featured-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform .4s ease;
-}
-.ainews-featured:hover .ainews-featured-img {
-  transform: scale(1.03);
-}
-.ainews-featured-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-}
-.ainews-featured-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 8px;
-}
-.ainews-featured-title {
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1.35;
-  letter-spacing: -0.01em;
-  color: var(--color-text);
-  margin: 0 0 6px;
-}
-.ainews-featured-title .ainews-new {
-  margin-left: 6px;
-  vertical-align: middle;
-}
-.ainews-featured-summary {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-  margin: 0 0 10px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.ainews-featured-meta {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  color: var(--color-text-faint);
-}
-
-/* ===== 普通条目：左文右图 ===== */
-.ainews-item {
+/* ===== 区块标题 ===== */
+.ainews-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 8px;
-  border-bottom: 1px solid var(--color-divider);
+  margin-bottom: 8px;
+}
+.ainews-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+/* ===== 快讯 ===== */
+.ainews-section--flash {
+  padding: 2px 0;
+}
+.ainews-flash {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
   text-decoration: none;
   color: var(--color-text);
-  transition: background .15s ease;
-  position: relative;
-  border-radius: var(--radius-md);
+  transition: opacity .2s ease;
 }
-.ainews-item:last-child {
-  border-bottom: none;
+.ainews-flash:hover {
+  opacity: .8;
 }
-.ainews-item:hover {
-  background: color-mix(in oklab, var(--color-surface-2) 25%, transparent);
-}
-.ainews-item-main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.ainews-item-tagline {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-}
-.ainews-tag-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--color-text-faint);
+.ainews-flash-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-primary);
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
   flex-shrink: 0;
 }
-.ainews-tag-dot--new {
-  background: var(--color-primary);
+.ainews-flash-time {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-faint);
+  flex-shrink: 0;
 }
-.ainews-item-tag {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.ainews-item-title {
+.ainews-flash-title {
   font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
   color: var(--color-text);
   margin: 0;
-  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
 }
-.ainews-item-meta {
+
+/* ===== 今日必读 ===== */
+.ainews-section--mustread {
+  padding: 2px 0;
+}
+.ainews-mustread-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ainews-mustread-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  text-decoration: none;
+  color: var(--color-text);
+  border-radius: var(--radius-md);
+  transition: background .15s ease;
+}
+.ainews-mustread-item:hover {
+  background: var(--color-surface-2);
+}
+.ainews-mustread-num {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary);
+  flex-shrink: 0;
+  min-width: 22px;
+}
+.ainews-mustread-title {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--color-text);
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* ===== 瀑布流资讯 ===== */
+.ainews-section--waterfall {
+  padding: 2px 0;
+}
+.ainews-waterfall-list {
+  display: flex;
+  flex-direction: column;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.ainews-waterfall-list::-webkit-scrollbar {
+  width: 3px;
+}
+.ainews-waterfall-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ainews-waterfall-list::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+.ainews-waterfall-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--color-divider);
+  text-decoration: none;
+  color: var(--color-text);
+  transition: opacity .2s ease;
+}
+.ainews-waterfall-item:last-child {
+  border-bottom: none;
+}
+.ainews-waterfall-item:hover {
+  opacity: .85;
+}
+.ainews-waterfall-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.ainews-waterfall-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--color-text);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.ainews-waterfall-meta {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--color-text-faint);
-  white-space: nowrap;
 }
 
-/* 右侧缩略图 */
-.ainews-item-thumb {
-  flex: 0 0 72px;
-  height: 52px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--color-surface-2);
-}
-.ainews-item-thumb-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
+/* 通用元信息 */
 .ainews-meta-source {
   color: var(--color-text-muted);
   font-weight: 500;
@@ -1464,9 +1405,10 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
   border-radius: 3px;
   letter-spacing: 0.05em;
   flex-shrink: 0;
+  margin-left: 5px;
+  vertical-align: middle;
 }
 
-/* 查看更多 */
 /* 加载/空态 */
 .ainews-loading,
 .ainews-empty {
@@ -1477,41 +1419,12 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
 }
 
 /* ===== 响应式 ===== */
-@media (max-width: 760px) {
-  .ainews-featured {
-    flex-direction: column;
-    gap: 12px;
-  }
-  .ainews-featured-img-wrap {
-    flex: none;
-    width: 100%;
-    height: 160px;
-  }
-  .ainews-featured-title {
-    font-size: 15px;
-  }
-  .ainews-item-thumb {
-    flex: 0 0 64px;
-    height: 46px;
-  }
-  .ainews-carousel {
-    min-height: 156px;
-  }
-}
 @media (max-width: 560px) {
   .ainews-card { padding: 16px; }
-  .ainews-featured-img-wrap { height: 130px; }
-  .ainews-item-title {
-    font-size: 12px;
-  }
-  .ainews-item-thumb {
-    flex: 0 0 56px;
-    height: 40px;
-  }
-  .ainews-carousel {
-    min-height: 148px;
-    perspective: 800px;
-  }
+  .ainews-flash-title { font-size: 12px; }
+  .ainews-mustread-title { font-size: 12px; }
+  .ainews-waterfall-title { font-size: 11px; }
+  .ainews-waterfall-list { max-height: 220px; }
 }
 
 

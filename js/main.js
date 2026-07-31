@@ -929,7 +929,7 @@
         refreshBtn.style.transform = 'rotate(360deg)';
         refreshBtn.style.transition = 'transform .5s ease';
         setTimeout(function () { refreshBtn.style.transform = ''; refreshBtn.style.transition = ''; }, 500);
-        window.fetchAiNews().then(window.renderAiNews);
+        window.fetchAiNews(true).then(window.renderAiNews);
       });
     }
   })();
