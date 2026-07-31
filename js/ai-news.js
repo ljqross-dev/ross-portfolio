@@ -13,18 +13,18 @@
 (function () {
   'use strict';
 
-  var CACHE_KEY = 'ross_ai_news_cache';
+  var CACHE_KEY = 'ross_ai_news_cache_v2';
   var CACHE_TTL = 6 * 60 * 60 * 1000; // 6 小时
   var MAX_NEWS = 18;
 
   // RSS 源配置
   var RSS_SOURCES = [
     { name: 'TechCrunch', url: 'https://techcrunch.com/category/artificial-intelligence/feed/', logo: 'TC', type: 'en', tag: 'AI' },
-    { name: 'The Verge', url: 'https://www.theverge.com/ai-artificial-intelligence/rss/index.xml', logo: 'TV', type: 'en', tag: 'Tech' },
+    { name: 'The Verge', url: 'https://www.theverge.com/rss/index.xml', logo: 'TV', type: 'en', tag: 'Tech' },
     { name: 'MIT Tech', url: 'https://www.technologyreview.com/feed/', logo: 'MIT', type: 'en', tag: 'Research' },
     { name: 'Ars Technica', url: 'https://arstechnica.com/tag/ai/feed/', logo: 'ARS', type: 'en', tag: 'AI' },
     { name: 'VentureBeat', url: 'https://venturebeat.com/category/ai/feed/', logo: 'VB', type: 'en', tag: 'AI' },
-    { name: '机器之心', url: 'https://www.jiqizhixin.com/rss', logo: '机器', type: 'cn', tag: 'AI' },
+    { name: '36氪', url: 'https://36kr.com/feed', logo: '36氪', type: 'cn', tag: 'Tech' },
     { name: '量子位', url: 'https://www.qbitai.com/feed', logo: '量子', type: 'cn', tag: 'AI' }
   ];
 
@@ -35,7 +35,7 @@
     { title: 'Figma AI 新增 Design Review 智能审查功能', source: 'MIT Tech', logo: 'MIT', url: 'https://www.technologyreview.com', date: new Date().getTime() - 24 * 3600 * 1000, summary: 'Figma 推出 AI 驱动的设计审查工具，可自动检测可用性问题。', tag: 'Research' },
     { title: 'Midjourney V7 Alpha 发布，写实风格再进化', source: 'Ars Technica', logo: 'ARS', url: 'https://arstechnica.com/tag/ai/', date: new Date().getTime() - 26 * 3600 * 1000, summary: 'Midjourney 最新版本在人物肖像和场景渲染方面达到新高度。', tag: 'AI' },
     { title: '苹果发布 Liquid Glass Design Kit 设计系统', source: 'VentureBeat', logo: 'VB', url: 'https://venturebeat.com/category/ai/', date: new Date().getTime() - 48 * 3600 * 1000, summary: 'Apple 推出全新玻璃质感设计语言，适配 visionOS 和 iOS 19。', tag: 'Tech' },
-    { title: 'Stable Diffusion 3.5 开源，生成质量媲美闭源模型', source: '机器之心', logo: '机器', url: 'https://www.jiqizhixin.com', date: new Date().getTime() - 3 * 3600 * 1000, summary: 'Stability AI 发布 SD 3.5，在文字渲染和构图方面大幅提升。', tag: 'AI' },
+    { title: 'Stable Diffusion 3.5 开源，生成质量媲美闭源模型', source: '36氪', logo: '36氪', url: 'https://36kr.com', date: new Date().getTime() - 3 * 3600 * 1000, summary: 'Stability AI 发布 SD 3.5，在文字渲染和构图方面大幅提升。', tag: 'AI' },
     { title: 'Runway Gen-4 视频生成模型亮相，时长突破 40 秒', source: '量子位', logo: '量子', url: 'https://www.qbitai.com', date: new Date().getTime() - 8 * 3600 * 1000, summary: 'Runway 最新模型支持更长视频生成，运动一致性显著改善。', tag: 'AI' },
     { title: 'Canva 推出 Magic Studio AI 套件，覆盖全设计流程', source: 'TechCrunch', logo: 'TC', url: 'https://techcrunch.com/category/artificial-intelligence/', date: new Date().getTime() - 12 * 3600 * 1000, summary: 'Canva 整合 AI 功能到设计全流程，从文案到排版一键完成。', tag: 'AI' },
     { title: 'Google DeepMind 推出新架构，推理效率提升 3 倍', source: 'MIT Tech', logo: 'MIT', url: 'https://www.technologyreview.com', date: new Date().getTime() - 18 * 3600 * 1000, summary: 'DeepMind 新架构在保持准确率的同时大幅降低推理成本。', tag: 'Research' },
@@ -86,7 +86,7 @@
 
   // 从 rss2json API 获取单个 RSS 源
   function fetchRss(source) {
-    var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(source.url) + '&count=4';
+    var apiUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(source.url);
     return new Promise(function (resolve) {
       var xhr = new XMLHttpRequest();
       xhr.open('GET', apiUrl, true);
