@@ -177,6 +177,7 @@
     var modal = document.getElementById('modal');
     var body = document.getElementById('modalBody');
     var behance = document.getElementById('modalBehance');
+    var zcool = document.getElementById('modalZcool');
     if (!modal || !body) return;
     var lastFocus = null;
 
@@ -206,6 +207,7 @@
         '<div class="modal-gallery">' + imgs + '</div>';
 
       if (behance) behance.href = p.behance;
+      if (zcool) zcool.href = p.zcool || 'https://www.zcool.com.cn/u/14877158';
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
@@ -340,34 +342,6 @@
     });
     var av = document.querySelector('.about-video');
     if (av) { var pa = av.play(); if (pa && typeof pa.catch === 'function') pa.catch(function () {}); }
-
-    /* 视频展开/收起 */
-    var expandedVideo = false;
-    function applyLimitVideo() {
-      var cards = Array.prototype.slice.call(grid.querySelectorAll('.video-card'));
-      var twoRows = gridCols() * 2;
-      if (!expandedVideo) {
-        cards.forEach(function (c, i) {
-          if (i >= twoRows) c.setAttribute('hidden', '');
-          else c.removeAttribute('hidden');
-        });
-      } else {
-        cards.forEach(function (c) { c.removeAttribute('hidden'); });
-      }
-      var btn = document.getElementById('videoExpandBtn');
-      if (btn) {
-        if (cards.length > twoRows) {
-          btn.hidden = false;
-          btn.textContent = expandedVideo ? '收起' : '展开全部';
-        } else {
-          btn.hidden = true;
-        }
-      }
-    }
-    applyLimitVideo();
-    var vb = document.getElementById('videoExpandBtn');
-    if (vb) vb.addEventListener('click', function () { expandedVideo = !expandedVideo; applyLimitVideo(); });
-    window.addEventListener('resize', function () { applyLimitVideo(); });
   })();
 
   /* ============================================================

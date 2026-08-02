@@ -7,56 +7,58 @@
  *   - hover 哪个条目 → 悬浮窗垂直位置轻微跟随（更"贴近"内容）
  *   - 离开条目 + 离开悬浮窗 → 淡出隐藏
  *
- * 数据：当前为模拟数据，每 4 秒微抖动营造实时感
- *      （后续可接入 westock / 腾讯股票 API 替换 updateMarketData）
+ * 数据：调用后端 /api/market（拉取腾讯财经 qt.gtimg.cn 全 A 股行情并统计）
+ *      首次加载后由前端每 30 秒轮询一次
  */
 (function () {
   'use strict';
 
-  // 模拟数据初始值
-  var INITIAL = {
-    hot:        { name: '广告营销', pct: '+8.37%' },
-    zt:         108,    // 涨停家数
-    dt:         0,      // 跌停家数
-    flow:       705.44, // 主力资金净流入（亿元）
-    fx:         6.75,   // 美元兑人民币
-    upCount:    4748,
-    flatCount:  101,
-    downCount:  679
+  // 真实数据字段（来自 /api/market 响应）
+  var STATE = {
+    zt: 0,         // 涨停家数
+    dt: 0,         // 跌停家数
+    flow: 0,       // 主力资金净流入（亿元）
+    fx: 7.18,      // 美元兑人民币
+    upCount: 0,    // 上涨家数
+    flatCount: 0,  // 平盘家数
+    downCount: 0,  // 下跌家数
+    hot: { name: '—', pct: '—' },
+    sh: null,      // 上证指数
+    upRatio: 0,
+    flatRatio: 0,
+    downRatio: 0,
+    updatedAt: null,  // 数据时间戳
+    isFallback: false
   };
 
-  // 热门行业候选（轮换）
-  var HOT_LIST = [
-    { name: '广告营销', pct: '+8.37%' },
-    { name: '人工智能', pct: '+5.62%' },
-    { name: '半导体',   pct: '+4.18%' },
-    { name: '游戏',     pct: '+3.91%' },
-    { name: '新能源车', pct: '+2.74%' }
-  ];
-
-  // 涨跌方向（参考：截图显示涨势）
-  var STATE = Object.assign({}, INITIAL);
-  STATE.hot = Object.assign({}, INITIAL.hot);
-  var HOT_INDEX = 0;
-
-  var REFRESH_TIMER = null;   // 数据抖动定时器
+  var REFRESH_TIMER = null;       // 数据轮询定时器
+  var SOFT_TICKER = null;         // 微抖动定时器（视觉）
   var SPIN_LOCK = false;
+  var IO = null;                  // IntersectionObserver 实例
+  var CARD_OBSERVER_WATCHING = false;
+  var HEADER_GUARD = 68 + 16;     // sticky header 高度 + 缓冲
+  var POLL_INTERVAL = 30000;      // 30 秒轮询一次
+  var SOFT_INTERVAL = 4000;       // 视觉抖动 4 秒
 
   // ========== DOM 引用 ==========
   function $(id) { return document.getElementById(id); }
-  var floatEl, cardEl, refreshBtn, listEl;
+  var floatEl, cardEl, refreshBtn, listEl, updateTimeEl;
   var ztEl, dtEl, flowEl, fxEl, upEl, flatEl, downEl, hotNameEl, hotPctEl;
   var barUpEl, barFlatEl, barDownEl;
 
-  // ========== 数据更新（模拟） ==========
-  function jitterValue(v, range, decimals) {
-    var delta = (Math.random() - 0.5) * 2 * range;
-    var next = v + delta;
-    if (typeof v === 'number' && Number.isInteger(v)) {
-      return Math.max(0, Math.round(next));
+  // ========== 视觉抖动（不改 STATE 基线） ==========
+  function applyJitter() {
+    // 对展示值做微小偏移，使数字"跳动"但不改变真实基线
+    function jit(v, range, decimals) {
+      var delta = (Math.random() - 0.5) * 2 * range;
+      var factor = Math.pow(10, decimals == null ? 2 : decimals);
+      return Math.max(0, Math.round((v + delta) * factor) / factor);
     }
-    var factor = Math.pow(10, decimals == null ? 2 : decimals);
-    return Math.max(0, Math.round(next * factor) / factor);
+    // 仅视觉偏移显示（zt/dt/flow/fx 用 ±小范围抖动）
+    if (ztEl)    ztEl.textContent    = jit(STATE.zt, 2, 0);
+    if (dtEl)    dtEl.textContent    = jit(STATE.dt, 1, 0);
+    if (flowEl)  flowEl.textContent  = (STATE.flow >= 0 ? '+' : '') + jit(STATE.flow, 3, 2) + '\u4ebf';
+    if (fxEl)    fxEl.textContent    = jit(STATE.fx, 0.003, 4);
   }
 
   function flashElement(el, dir) {
@@ -64,52 +66,45 @@
     var cls = dir === 'up' ? 'is-flash-up' : (dir === 'down' ? 'is-flash-down' : '');
     if (!cls) return;
     el.classList.remove('is-flash-up', 'is-flash-down');
-    void el.offsetWidth;       // 触发重排重启动画
+    void el.offsetWidth;
     el.classList.add(cls);
     setTimeout(function () { el.classList.remove(cls); }, 900);
   }
 
-  function updateMarketData(opts) {
-    opts = opts || {};
-    var soft = opts.soft !== false;
+  // ========== 应用后端 API 数据到 STATE + DOM ==========
+  function applyApiData(data) {
+    if (!data) return;
 
-    if (soft) {
-      // 微抖动（自然涨跌）
-      var oldZt = STATE.zt, oldDt = STATE.dt;
-      var oldFlow = STATE.flow, oldFx = STATE.fx;
-      var oldUp = STATE.upCount, oldDown = STATE.downCount, oldFlat = STATE.flatCount;
+    var oldZt = STATE.zt, oldDt = STATE.dt, oldFlow = STATE.flow, oldFx = STATE.fx;
+    var oldUp = STATE.upCount, oldDown = STATE.downCount;
 
-      STATE.zt        = jitterValue(STATE.zt, 3, 0);
-      STATE.dt        = jitterValue(STATE.dt, 1, 0);
-      STATE.flow      = jitterValue(STATE.flow, 8, 2);
-      STATE.fx        = jitterValue(STATE.fx, 0.01, 2);
-      STATE.upCount   = jitterValue(STATE.upCount, 25, 0);
-      STATE.downCount = jitterValue(STATE.downCount, 12, 0);
-      STATE.flatCount = jitterValue(STATE.flatCount, 4, 0);
-    } else {
-      // 手动刷新：整体偏移更大
-      STATE.zt        = jitterValue(STATE.zt, 15, 0);
-      STATE.dt        = jitterValue(STATE.dt, 5, 0);
-      STATE.flow      = jitterValue(STATE.flow, 30, 2);
-      STATE.fx        = jitterValue(STATE.fx, 0.02, 2);
-      STATE.upCount   = jitterValue(STATE.upCount, 80, 0);
-      STATE.downCount = jitterValue(STATE.downCount, 40, 0);
-      STATE.flatCount = jitterValue(STATE.flatCount, 12, 0);
-      // 切换热门行业
-      HOT_INDEX = (HOT_INDEX + 1) % HOT_LIST.length;
-      STATE.hot = Object.assign({}, HOT_LIST[HOT_INDEX]);
-    }
+    STATE.zt        = data.zt || 0;
+    STATE.dt        = data.dt || 0;
+    STATE.flow      = data.flow_yi || 0;    // API 返回 flow_yi（亿元）
+    STATE.fx        = data.fx || 7.18;
+    STATE.upCount   = data.up || 0;
+    STATE.downCount = data.down || 0;
+    STATE.flatCount = data.flat || 0;
+    STATE.hot       = data.hot || { name: '—', pct: '—' };
+    STATE.sh        = data.sh || null;
+    STATE.updatedAt = data.server_time ? formatTime(data.server_time) : null;
+    STATE.isFallback = data.isFallback || false;
 
     // 渲染到 DOM
     if (ztEl)    ztEl.textContent = STATE.zt;
     if (dtEl)    dtEl.textContent = STATE.dt;
     if (flowEl)  flowEl.textContent = (STATE.flow >= 0 ? '+' : '') + STATE.flow.toFixed(2) + '\u4ebf';
-    if (fxEl)    fxEl.textContent = STATE.fx.toFixed(2);
+    if (fxEl)    fxEl.textContent = STATE.fx.toFixed(4);
     if (upEl)    upEl.textContent = STATE.upCount;
     if (flatEl)  flatEl.textContent = STATE.flatCount;
     if (downEl)  downEl.textContent = STATE.downCount;
     if (hotNameEl) hotNameEl.textContent = STATE.hot.name;
     if (hotPctEl)  hotPctEl.textContent = STATE.hot.pct;
+
+    // 更新时间显示
+    if (updateTimeEl && STATE.updatedAt) {
+      updateTimeEl.textContent = STATE.updatedAt;
+    }
 
     // 进度条
     var total = STATE.upCount + STATE.flatCount + STATE.downCount;
@@ -119,14 +114,49 @@
       barDownEl.style.width = (STATE.downCount / total * 100).toFixed(1) + '%';
     }
 
-    // 闪光提示（仅手动刷新时）
-    if (!soft) {
-      flashElement(ztEl, 'up');
-      flashElement(flowEl, STATE.flow >= 0 ? 'up' : 'down');
-      flashElement(fxEl, 'up');
-      flashElement(upEl, 'up');
-      flashElement(downEl, 'down');
+    // 闪光提示
+    flashElement(ztEl,    STATE.zt > oldZt ? 'up' : (STATE.zt < oldZt ? 'down' : ''));
+    flashElement(flowEl,  STATE.flow >= 0 ? 'up' : 'down');
+    flashElement(upEl,    STATE.upCount > oldUp ? 'up' : '');
+    flashElement(downEl,  STATE.downCount > oldDown ? 'down' : '');
+  }
+
+  // 格式化时间戳为 HH:MM
+  function formatTime(ts) {
+    if (!ts) return '--:--';
+    var d = new Date(ts * 1000);
+    var h = String(d.getHours()).padStart(2, '0');
+    var m = String(d.getMinutes()).padStart(2, '0');
+    return h + ':' + m;
+  }
+
+  // ========== 从后端拉取行情数据 ==========
+  function fetchMarketData(opts) {
+    opts = opts || {};
+    var manual = !!opts.manual;
+
+    if (SPIN_LOCK && !manual) return;
+    if (manual) {
+      SPIN_LOCK = true;
+      if (refreshBtn) refreshBtn.classList.add('is-spin');
     }
+
+    fetch('/api/market')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        applyApiData(data);
+      })
+      .catch(function (err) {
+        console.warn('[market-float] fetch /api/market failed:', err);
+      })
+      .then(function () {
+        if (manual) {
+          setTimeout(function () {
+            if (refreshBtn) refreshBtn.classList.remove('is-spin');
+            SPIN_LOCK = false;
+          }, 400);
+        }
+      });
   }
 
   // ========== Hover 交互 ==========
@@ -181,6 +211,19 @@
 
   function showFloat(targetItem) {
     if (!floatEl) return;
+
+    // === 防遮挡判定 1：ainews-card 不在视口内（已滚出）→ 强制隐藏 ===
+    if (cardEl && isCardOutOfView(cardEl)) {
+      hideFloat();
+      return;
+    }
+
+    // === 防遮挡判定 2：悬浮窗屏幕位置会被 sticky header 遮挡 → 强制隐藏 ===
+    if (cardEl && willFloatBeCovered(cardEl)) {
+      hideFloat();
+      return;
+    }
+
     markInside(true);
     floatEl.classList.add('is-visible');
     floatEl.setAttribute('aria-hidden', 'false');
@@ -205,30 +248,82 @@
     floatEl.setAttribute('aria-hidden', 'true');
   }
 
+  /**
+   * 判断 ainews-card 是否完全不在视口内
+   *  - 卡片底部在视口顶部之上（已向上滚出）
+   *  - 卡片顶部在视口底部之下（已向下滚出，且不是首屏进入）
+   */
+  function isCardOutOfView(el) {
+    var rect = el.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    // 完全在视口上方
+    if (rect.bottom <= 0) return true;
+    // 完全在视口下方（且距离 > 一屏）
+    if (rect.top >= vh) return true;
+    return false;
+  }
+
+  /**
+   * 判断悬浮窗（基于其当前 top）是否会被 sticky header 遮挡
+   *  - 卡片顶部 + 悬浮窗 top < HEADER_GUARD → 被遮
+   */
+  function willFloatBeCovered(el) {
+    var rect = el.getBoundingClientRect();
+    var floatTopPx = parseFloat(floatEl.style.top) || 60;
+    var screenTop = rect.top + floatTopPx;
+    return screenTop < HEADER_GUARD;
+  }
+
+  /**
+   * IntersectionObserver 回调
+   * 卡片与视口相交率变为 0 时强制隐藏
+   */
+  function onCardIntersect(entries) {
+    for (var i = 0; i < entries.length; i++) {
+      if (!entries[i].isIntersecting) {
+        hideFloat();
+      }
+    }
+  }
+
+  /**
+   * scroll/resize 监听：在悬浮窗已可见时检查是否被 header 遮挡
+   */
+  function onScrollCheck() {
+    if (!floatEl || !floatEl.classList.contains('is-visible')) return;
+    if (!cardEl) return;
+    if (isCardOutOfView(cardEl) || willFloatBeCovered(cardEl)) {
+      hideFloat();
+    }
+  }
+
   // ========== 刷新按钮 ==========
   function bindRefresh() {
     if (!refreshBtn) return;
     refreshBtn.addEventListener('click', function (e) {
       e.stopPropagation();
       if (SPIN_LOCK) return;
-      SPIN_LOCK = true;
-      refreshBtn.classList.add('is-spin');
-      updateMarketData({ soft: false });
-      setTimeout(function () {
-        refreshBtn.classList.remove('is-spin');
-        SPIN_LOCK = false;
-      }, 600);
+      fetchMarketData({ manual: true });
     });
   }
 
-  // ========== 定时模拟实时抖动 ==========
+  // ========== 定时器：视觉抖动 + 数据轮询 ==========
   function startTicker() {
     stopTicker();
+
+    // 视觉抖动（每 SOFT_INTERVAL 毫秒，不改 STATE 基线）
+    SOFT_TICKER = setInterval(applyJitter, SOFT_INTERVAL);
+
+    // 数据轮询（每 POLL_INTERVAL 毫秒，拉取后端真实数据）
     REFRESH_TIMER = setInterval(function () {
-      updateMarketData({ soft: true });
-    }, 4000);
+      fetchMarketData();
+    }, POLL_INTERVAL);
   }
   function stopTicker() {
+    if (SOFT_TICKER) {
+      clearInterval(SOFT_TICKER);
+      SOFT_TICKER = null;
+    }
     if (REFRESH_TIMER) {
       clearInterval(REFRESH_TIMER);
       REFRESH_TIMER = null;
@@ -254,13 +349,29 @@
     barUpEl   = $('marketBarUp');
     barFlatEl = $('marketBarFlat');
     barDownEl = $('marketBarDown');
+    updateTimeEl = $('marketUpdateTime');
 
     if (!floatEl) return;
 
-    // 首次渲染
-    updateMarketData({ soft: false });
+    // 首次拉取真实数据
+    fetchMarketData();
     bindHover();
     bindRefresh();
     startTicker();
+
+    // 防遮挡：IntersectionObserver 监听 ainews-card 是否在视口内
+    if (cardEl && 'IntersectionObserver' in window && !CARD_OBSERVER_WATCHING) {
+      IO = new IntersectionObserver(onCardIntersect, {
+        root: null,
+        rootMargin: '-' + HEADER_GUARD + 'px 0px 0px 0px',
+        threshold: 0
+      });
+      IO.observe(cardEl);
+      CARD_OBSERVER_WATCHING = true;
+    }
+
+    // scroll/resize 兜底监听（防 IO 在跨阈值的快速滚动中漏掉）
+    window.addEventListener('scroll', onScrollCheck, { passive: true });
+    window.addEventListener('resize', onScrollCheck);
   };
 })();

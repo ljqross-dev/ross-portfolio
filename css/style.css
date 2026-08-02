@@ -690,6 +690,7 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
 .about-socials .soc:hover { color: var(--color-primary); background: transparent; border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }
 .about-socials .soc img { width: 20px; height: 20px; flex: none; border-radius: 6px; object-fit: contain; }
 .about-socials .soc img.soc-text { width: auto; height: 20px; border-radius: 0; }
+.about-socials .soc[href^="mailto:"] img { transform: scale(1.25); }
 
 @media (max-width: 560px) { .about-text .caps { grid-template-columns: 1fr; } }
 
@@ -808,15 +809,31 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
   border-radius: var(--radius-full);
 }
 .modal-back:hover { color: var(--color-text); background: var(--color-surface-2); }
+.modal-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.modal-zcool,
 .modal-behance {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   font-size: var(--text-sm);
-  color: var(--color-primary);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-full);
   border: 1px solid var(--color-divider);
+  white-space: nowrap;
+}
+.modal-zcool {
+  color: #E74C3C;
+}
+.modal-zcool:hover {
+  border-color: #E74C3C;
+  background: rgba(231, 76, 60, 0.06);
+}
+.modal-behance {
+  color: var(--color-primary);
 }
 .modal-behance:hover { border-color: var(--color-primary); }
 
@@ -995,7 +1012,7 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
 }
 .post-card[hidden] { display: none; }
 
-/* 展开全部 / 收起 按钮（作品、文章通用） */
+/* 展开全部 / 收起 按钮（仅文章、作品预留） */
 .expand-wrap { display: flex; justify-content: center; margin-top: var(--space-10); }
 .expand-btn {
   display: inline-flex; align-items: center; gap: 6px;
@@ -1616,21 +1633,12 @@ a, button, [role="button"], input, textarea { transition: color var(--transition
 .market-stat-label { color: #A8A49B; }
 .market-stat-val { font-weight: 700; color: #1A1A1A; font-family: var(--font-num, monospace); }
 .market-stat-unit { color: #A8A49B; font-size: 10px; }
-.market-float-setting {
+.market-float-time {
   margin-left: auto;
-  width: 22px;
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(26, 26, 26, 0.3);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: color .15s, background .15s;
-}
-.market-float-setting:hover {
-  color: #C8412B;
-  background: rgba(200, 65, 43, 0.08);
+  font-size: 10px;
+  color: #8B8884;
+  letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* 数字微抖动效果 */
